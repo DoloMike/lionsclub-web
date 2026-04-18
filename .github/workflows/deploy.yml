@@ -16,16 +16,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # --- Tailscale: connect to tailnet to reach internal Coolify API ---
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+
       # --- Wait for Coolify to go idle ---
       - name: Cancel queued/in-progress deployments and wait for idle
         run: |
-          COOLIFY_HOST="${{ secrets.COOLIFY_HOST }}"
+          COOLIFY_HOST="100.92.149.45"
+          COOLIFY_PORT="8889"
           APP_UUID="${{ secrets.COOLIFY_APPLICATION_UUID }}"
           TOKEN="${{ secrets.COOLIFY_TOKEN }}"
 
           # Cancel any active deployments
           DEPS=$(curl -sf \
-            "http://${COOLIFY_HOST}:8889/api/v1/deployments/applications/${APP_UUID}" \
+            "http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deployments/applications/${APP_UUID}" \
             -H "Authorization: Bearer ${TOKEN}")
           echo "$DEPS" | python3 -c "
           import json, sys, subprocess
@@ -37,7 +46,7 @@ jobs:
               if status in ('queued','in_progress') and uuid:
                   print(f'Cancelling {uuid} ({status})')
                   subprocess.run(['curl','-sf','-X','POST',
-                      f'http://${COOLIFY_HOST}:8889/api/v1/deployments/{uuid}/cancel',
+                      f'http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deployments/{uuid}/cancel',
                       '-H',f'Authorization: Bearer {TOKEN}',
                       capture_output=True)
           " 2>/dev/null || true
@@ -46,7 +55,7 @@ jobs:
           echo "Waiting for Coolify to go idle..."
           for i in $(seq 1 30); do
             ACTIVE=$(curl -sf \
-              "http://${COOLIFY_HOST}:8889/api/v1/deployments/applications/${APP_UUID}" \
+              "http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deployments/applications/${APP_UUID}" \
               -H "Authorization: Bearer ${TOKEN}" \
               | python3 -c "
           import json,sys
@@ -66,12 +75,13 @@ jobs:
       # --- Trigger Coolify deploy ---
       - name: Trigger Coolify deploy
         run: |
-          COOLIFY_HOST="${{ secrets.COOLIFY_HOST }}"
+          COOLIFY_HOST="100.92.149.45"
+          COOLIFY_PORT="8889"
           APP_UUID="${{ secrets.COOLIFY_APPLICATION_UUID }}"
           TOKEN="${{ secrets.COOLIFY_TOKEN }}"
 
           RESULT=$(curl -sf -X POST \
-            "http://${COOLIFY_HOST}:8889/api/v1/deploy?uuid=${APP_UUID}&force=false" \
+            "http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deploy?uuid=${APP_UUID}&force=false" \
             -H "Authorization: Bearer ${TOKEN}")
           echo "$RESULT"
           DEPLOY_UUID=$(echo "$RESULT" | python3 -c "
@@ -90,12 +100,13 @@ jobs:
       # --- Wait for deploy to finish ---
       - name: Wait for deploy to finish
         run: |
-          COOLIFY_HOST="${{ secrets.COOLIFY_HOST }}"
+          COOLIFY_HOST="100.92.149.45"
+          COOLIFY_PORT="8889"
           TOKEN="${{ secrets.COOLIFY_TOKEN }}"
 
           for i in $(seq 1 36); do
             STATUS=$(curl -sf \
-              "http://${COOLIFY_HOST}:8889/api/v1/deployments/${DEPLOY_UUID}" \
+              "http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deployments/${DEPLOY_UUID}" \
               -H "Authorization: Bearer ${TOKEN}" \
               | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','unknown'))")
             echo "[$i] $STATUS"
