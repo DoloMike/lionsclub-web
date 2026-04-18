@@ -12,8 +12,20 @@ export async function createSupabaseServerClient() {
   }
 
   const cookieStore = await cookies();
+  const domain = (() => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) return undefined;
+    const hostname = new URL(appUrl).hostname;
+    return hostname === "localhost" ? undefined : hostname;
+  })();
 
   return createServerClient(env.supabase.url, env.supabase.anonKey, {
+    cookieOptions: {
+      path: "/",
+      sameSite: "lax",
+      secure: !env.isDevelopment,
+      domain,
+    },
     cookies: {
       getAll() {
         return cookieStore.getAll();

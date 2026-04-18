@@ -12,7 +12,20 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
+  const appHostname = (() => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) return undefined;
+    const hostname = new URL(appUrl).hostname;
+    return hostname === "localhost" ? undefined : hostname;
+  })();
+
   const supabase = createServerClient(url, anonKey, {
+    cookieOptions: {
+      path: "/",
+      sameSite: "lax",
+      secure: true,
+      domain: appHostname,
+    },
     cookies: {
       getAll() {
         return request.cookies.getAll();
