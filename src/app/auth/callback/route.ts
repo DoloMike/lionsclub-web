@@ -1,17 +1,24 @@
+import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { env } from "@/lib/env";
+
+function cookieDomain(): string | undefined {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) return undefined;
+  const hostname = new URL(appUrl).hostname;
+  return hostname === "localhost" ? undefined : hostname;
+}
 
 /**
- * OAuth callback: Supabase redirects here after Google auth.
- * We simply redirect back to the app and let the browser-side Supabase
- * client (detectSessionInUrl: true) complete the PKCE code exchange.
- *
- * Server-side exchange was tried but broke cookie hydration in production
- * due to internal URL / cookie domain mismatches. Browser-side exchange
- * is simpler and matches how IMI (working reference) handles it.
+ * OAuth callback: exchange the auth code server-side so session cookies are
+ * set before the next SSR render. Must use the PUBLIC Supabase URL (not the
+ * internal one) so cookie names match what the browser client expects
+ * (derived from the URL passed to createServerClient / createBrowserClient).
  */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const oauthError = requestUrl.searchParams.get("error");
+  const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") ?? "/";
   const safeNext =
     next.startsWith("/") && !next.startsWith("//") ? next : "/";
@@ -26,13 +33,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=oauth`);
   }
 
-  // Preserve all params (code, state, etc.) so the browser client can
-  // complete the PKCE exchange via detectSessionInUrl.
+  // Redirect target — no code param, session will be in cookies
   const redirectUrl = new URL(`${origin}${safeNext}`);
-  for (const [key, value] of requestUrl.searchParams.entries()) {
-    if (key === "next") continue;
-    redirectUrl.searchParams.set(key, value);
+  const response = NextResponse.redirect(redirectUrl);
+
+  if (!code || !env.supabase.url || !env.supabase.anonKey) {
+    return response;
   }
 
-  return NextResponse.redirect(redirectUrl);
+  // Use the PUBLIC URL so cookie names match the browser Supabase client
+  const supabase = createServerClient(env.supabase.url, env.supabase.anonKey, {
+    cookieOptions: {
+      path: "/",
+      sameSite: "lax",
+      secure: !env.isDevelopment,
+      domain: cookieDomain(),
+    },
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    return NextResponse.redirect(`${origin}/login?error=oauth`);
+  }
+
+  return response;
 }
