@@ -10,6 +10,7 @@ import { isAdminRole, isChapterMember, roleLabel } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 function readMetaString(
@@ -145,6 +146,14 @@ function LoggedInAccountMenu({
                 {role}
               </span>
             </p>
+          </div>
+          <div className="border-b border-border px-3 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Appearance
+            </p>
+            <div className="mt-2">
+              <ThemeToggle menuAlign="end" />
+            </div>
           </div>
           <div className="py-1">
             {admin ? (
