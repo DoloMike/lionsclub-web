@@ -7,7 +7,9 @@ export function createPublicServerClient() {
   if (!isSupabaseConfigured()) {
     return null;
   }
-  return createClient(env.supabase.url, env.supabase.anonKey, {
+  // Use internal URL for server-side requests to avoid Cloudflare round-trip
+  const url = env.supabase.internalUrl || env.supabase.url;
+  return createClient(url, env.supabase.anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

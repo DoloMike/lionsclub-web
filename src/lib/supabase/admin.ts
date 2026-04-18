@@ -10,7 +10,9 @@ export function getSupabaseAdmin(): SupabaseClient {
     throw new Error("Supabase is not configured");
   }
   if (!_admin) {
-    _admin = createClient(env.supabase.url, env.supabase.serviceRoleKey, {
+    // Use internal URL for server-side requests to avoid Cloudflare round-trip
+    const url = env.supabase.internalUrl || env.supabase.url;
+    _admin = createClient(url, env.supabase.serviceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,

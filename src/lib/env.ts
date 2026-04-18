@@ -8,6 +8,8 @@ export const env = {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    /** Server-only: internal URL to bypass Cloudflare for SSR requests */
+    internalUrl: process.env.SUPABASE_INTERNAL_URL ?? "",
   },
   /** Optional — chicken checkout is disabled until set */
   stripe: {
