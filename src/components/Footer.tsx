@@ -30,7 +30,7 @@ export function Footer({
   socialLinks: SocialLinkRow[];
 }) {
   return (
-    <footer className="mt-auto border-t border-border bg-muted/40">
+    <footer className="mt-auto border-t border-border bg-gradient-to-b from-accent/[0.06] to-muted/45 dark:from-transparent dark:to-muted/40">
       <Container className="py-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>

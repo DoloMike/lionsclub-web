@@ -9,13 +9,14 @@
  * official brand guidelines when publishing.
  */
 :root {
-  --background: #f6f7fb;
+  /* Warm paper + gold undertone (Lions gold #ebb700) — light mode only */
+  --background: #f7f5f0;
   --foreground: #0f172a;
-  --muted: #e8ecf4;
+  --muted: #efe8dd;
   --muted-foreground: #475569;
-  --card: #ffffff;
+  --card: #fffefb;
   --card-foreground: #0f172a;
-  --border: #d7dee9;
+  --border: #e2d7c6;
   /* Matches logo-dark.svg fill */
   --primary: #00338d;
   --primary-foreground: #ffffff;
@@ -27,8 +28,8 @@
   --warning: #b45309;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
-  /* Warm band for civic sections (light mode) */
-  --section-warm: #faf6f0;
+  /* Stronger gold-tint band for civic sections (light mode) */
+  --section-warm: #faf3e6;
 }
 
 .dark {

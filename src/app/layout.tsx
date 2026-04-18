@@ -66,7 +66,10 @@ export default async function RootLayout({
           </a>
           <Header session={session} />
           <FundraiserOrderBanner segments={fundraiserBannerSegments} />
-          <main id="main-content" className="flex-1">
+          <main
+            id="main-content"
+            className="flex-1 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,rgba(235,183,0,0.09),transparent_55%)] dark:bg-none"
+          >
             {children}
           </main>
           <BackToTop />

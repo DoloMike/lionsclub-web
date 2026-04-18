@@ -9,7 +9,7 @@ import { site } from "@/lib/site";
 
 export function Header({ session }: { session: SessionProfile | null }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-[inset_0_2px_0_0_rgba(235,183,0,0.28)] backdrop-blur supports-[backdrop-filter]:bg-background/80 dark:shadow-none">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <HeaderBrandLink
           className="flex min-w-0 items-center gap-3 sm:gap-4"

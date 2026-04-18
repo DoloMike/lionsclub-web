@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function LoginPanel({
@@ -43,14 +44,11 @@ export function LoginPanel({
         <strong>Sign in with Google</strong> in the site header (including
         One Tap when it appears).
       </p>
-      <button
-        type="button"
+      <GoogleSignInButton
+        variant="full"
+        pending={pending}
         onClick={() => void signInWithGoogle()}
-        disabled={pending}
-        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
-      >
-        {pending ? "Redirecting…" : "Continue with Google"}
-      </button>
+      />
     </div>
   );
 }

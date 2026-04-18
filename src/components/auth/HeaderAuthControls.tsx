@@ -8,6 +8,7 @@ import type { User } from "@supabase/supabase-js";
 import type { SessionProfile } from "@/lib/auth/session-profile";
 import { isAdminRole, isChapterMember, roleLabel } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 function readMetaString(
@@ -331,14 +332,14 @@ export function HeaderAuthControls({
           onLoad={() => setGsiLoaded(true)}
         />
       ) : null}
-      <button
-        type="button"
+      <GoogleSignInButton
+        variant="compact"
+        pending={oauthPending}
+        pendingLabel="Signing in…"
         onClick={() => void signInWithGoogleOAuth()}
-        disabled={oauthPending}
-        className="text-sm font-medium text-muted-foreground underline-offset-4 transition hover:text-foreground hover:underline disabled:opacity-50"
       >
-        {oauthPending ? "Signing in…" : "Sign in with Google"}
-      </button>
+        Sign in with Google
+      </GoogleSignInButton>
     </div>
   );
 }
