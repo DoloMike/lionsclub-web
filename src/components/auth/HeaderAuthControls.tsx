@@ -297,6 +297,11 @@ export function HeaderAuthControls({
     try {
       const supabase = createBrowserSupabaseClient();
       await supabase.auth.signOut();
+      await fetch("/auth/signout", {
+        method: "POST",
+        credentials: "include",
+      });
+      router.push("/");
       router.refresh();
     } finally {
       setSignOutPending(false);
