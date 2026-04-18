@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import type { SessionProfile } from "@/lib/auth/session-profile";
+import { isAdminRole, isChapterMember } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isNavHrefActive, mainNav, mobileNavLinkClassName } from "@/lib/nav";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -17,10 +19,26 @@ function getFocusable(panel: HTMLElement): HTMLElement[] {
 }
 
 export function MobileNav({ session }: { session: SessionProfile | null }) {
+  const router = useRouter();
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+  const [signOutPending, setSignOutPending] = useState(false);
   const { pending: googlePending, signIn } = useGoogleOAuthSignIn();
   const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
+  const admin = session ? isAdminRole(session.role) : false;
+  const chapterMember = session ? isChapterMember(session.role) : false;
+
+  const signOut = useCallback(async () => {
+    if (!hasSupabase) return;
+    setSignOutPending(true);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      await supabase.auth.signOut();
+      router.refresh();
+    } finally {
+      setSignOutPending(false);
+    }
+  }, [hasSupabase, router]);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
@@ -162,6 +180,64 @@ export function MobileNav({ session }: { session: SessionProfile | null }) {
                   <ThemeToggle menuAlign="start" />
                 </div>
               </div>
+              {session && hasSupabase ? (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Account
+                  </p>
+                  <ul className="mt-2 flex flex-col gap-1">
+                    {admin ? (
+                      <li>
+                        <Link
+                          href="/admin"
+                          className={mobileNavLinkClassName(
+                            isNavHrefActive(pathname, "/admin"),
+                          )}
+                          aria-current={
+                            isNavHrefActive(pathname, "/admin")
+                              ? "page"
+                              : undefined
+                          }
+                          onClick={() => setOpen(false)}
+                        >
+                          Admin
+                        </Link>
+                      </li>
+                    ) : null}
+                    {!chapterMember ? (
+                      <li>
+                        <Link
+                          href="/membership"
+                          className={mobileNavLinkClassName(
+                            isNavHrefActive(pathname, "/membership"),
+                          )}
+                          aria-current={
+                            isNavHrefActive(pathname, "/membership")
+                              ? "page"
+                              : undefined
+                          }
+                          onClick={() => setOpen(false)}
+                        >
+                          Become a member
+                        </Link>
+                      </li>
+                    ) : null}
+                    <li>
+                      <button
+                        type="button"
+                        className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                        disabled={signOutPending}
+                        onClick={() => {
+                          void signOut();
+                          setOpen(false);
+                        }}
+                      >
+                        {signOutPending ? "Signing out…" : "Sign out"}
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              ) : null}
               {!session && hasSupabase ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
