@@ -70,7 +70,7 @@ export function Landing() {
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
                 Vision and hearing programs, youth support, scholarships, and
-                community events—we&apos;re your neighbors, improving health and
+                community events, we&apos;re your neighbors, improving health and
                 opportunity close to home.
               </p>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
