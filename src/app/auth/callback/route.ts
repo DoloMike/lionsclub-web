@@ -20,10 +20,17 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = await cookies();
+    const appHostname = new URL(appOrigin).hostname;
     const supabase = createServerClient(
       env.supabase.url,
       env.supabase.anonKey,
       {
+        cookieOptions: {
+          path: "/",
+          sameSite: "lax",
+          secure: !env.isDevelopment,
+          domain: appHostname === "localhost" ? undefined : appHostname,
+        },
         cookies: {
           getAll() {
             return cookieStore.getAll();
