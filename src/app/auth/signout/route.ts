@@ -10,10 +10,10 @@ function cookieDomain(): string | undefined {
 }
 
 export async function POST(request: NextRequest) {
-  const url = env.supabase.url;
+  const url = env.supabase.internalUrl || env.supabase.url;
   const anonKey = env.supabase.anonKey;
 
-  if (!url || !anonKey) {
+  if (!env.supabase.url || !anonKey) {
     return NextResponse.json({ ok: true });
   }
 

@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  const supabase = createServerClient(env.supabase.url, env.supabase.anonKey, {
+  const supabase = createServerClient(env.supabase.internalUrl || env.supabase.url, env.supabase.anonKey, {
     cookieOptions: {
       path: "/",
       sameSite: "lax",

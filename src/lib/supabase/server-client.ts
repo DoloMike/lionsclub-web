@@ -19,7 +19,8 @@ export async function createSupabaseServerClient() {
     return hostname === "localhost" ? undefined : hostname;
   })();
 
-  return createServerClient(env.supabase.url, env.supabase.anonKey, {
+  const url = env.supabase.internalUrl || env.supabase.url;
+  return createServerClient(url, env.supabase.anonKey, {
     cookieOptions: {
       path: "/",
       sameSite: "lax",
