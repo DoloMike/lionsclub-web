@@ -74,8 +74,8 @@ jobs:
           COOLIFY_HOST="100.92.149.45"
           COOLIFY_PORT="8889"
 
-          RESULT=$(curl -sf -X POUT \
-            "http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deploy?uuid=${APP_UUID&force=false" \
+          RESULT=$(curl -sf -X POST \
+            "http://${COOLIFY_HOST}:${COOLIFY_PORT}/api/v1/deploy?uuid=${APP_UUID}&force=false" \
             -H "Authorization: Bearer ${TOKEN}")
           echo "$RESULT"
           DEPLOY_UUID=$(echo "$RESULT" | python3 -c "
