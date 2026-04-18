@@ -1,7 +1,28 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Paths that should skip session refresh to avoid rate limiting the auth server
+const AUTH_SKIP_PATHS = [
+  "/auth/callback",
+  "/_rsc",
+  "/_next",
+];
+
+function shouldSkipAuth(pathname: string): boolean {
+  return AUTH_SKIP_PATHS.some(
+    (p) => pathname.startsWith(p) || pathname === p
+  );
+}
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip auth for callback, RSC, and Next.js internals — avoid hammering
+  // the Supabase auth server with getUser() calls on every RSC prefetch.
+  if (shouldSkipAuth(pathname)) {
+    return NextResponse.next({ request });
+  }
+
   const supabaseResponse = NextResponse.next({
     request,
   });
