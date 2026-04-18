@@ -1,36 +1,55 @@
 @import "tailwindcss";
 
-/* Light-first civic palette; dark via OS preference only (see site plan §9). */
+/* Class-based dark mode (see ThemeProvider + ThemeToggle); default is system via next-themes. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Light-first palette aligned with Lions Clubs International public identity
+ * (navy + gold; logo-dark.svg on light surfaces). Verify exact values against
+ * official brand guidelines when publishing.
+ */
 :root {
-  --background: #faf8f5;
-  --foreground: #0b1220;
-  --muted: #f0ebe3;
-  --muted-foreground: #52525b;
+  --background: #f6f7fb;
+  --foreground: #0f172a;
+  --muted: #e8ecf4;
+  --muted-foreground: #475569;
   --card: #ffffff;
-  --card-foreground: #0b1220;
-  --border: #e4dfd4;
-  --primary: #0c4a5c;
+  --card-foreground: #0f172a;
+  --border: #d7dee9;
+  /* Matches logo-dark.svg fill */
+  --primary: #00338d;
   --primary-foreground: #ffffff;
-  --accent: #b45309;
-  --accent-foreground: #ffffff;
-  --ring: #0c4a5c;
+  /* Matches logo-dark.svg gold */
+  --accent: #ebb700;
+  --accent-foreground: #00338d;
+  --ring: #00338d;
+  --success: #15803d;
+  --warning: #b45309;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  /* Warm band for civic sections (light mode) */
+  --section-warm: #faf6f0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f1419;
-    --foreground: #ededed;
-    --muted: #1a222f;
-    --muted-foreground: #a1a1aa;
-    --card: #151b24;
-    --card-foreground: #ededed;
-    --border: #2a3441;
-    --primary: #2dd4bf;
-    --primary-foreground: #0b1220;
-    --accent: #fbbf24;
-    --accent-foreground: #0b1220;
-    --ring: #2dd4bf;
-  }
+.dark {
+  --background: #060f1c;
+  --foreground: #f1f5f9;
+  --muted: #0f1f35;
+  --muted-foreground: #94a3b8;
+  --card: #0c1829;
+  --card-foreground: #f1f5f9;
+  --border: #1e3a5f;
+  /* Gold-forward interactive on deep navy */
+  --primary: #ebb700;
+  --primary-foreground: #00338d;
+  --accent: #3d7ab8;
+  --accent-foreground: #ffffff;
+  --ring: #ffc72c;
+  --success: #86efac;
+  --warning: #fcd34d;
+  --destructive: #f87171;
+  --destructive-foreground: #450a0a;
+  --section-warm: #0f1828;
 }
 
 @theme inline {
@@ -46,6 +65,11 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-section-warm: var(--section-warm);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

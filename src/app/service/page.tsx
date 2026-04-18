@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ExternalLink } from "@/components/ExternalLink";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
 import { site } from "@/lib/site";
@@ -47,9 +48,9 @@ export default function ServicePage() {
           complement the work we do locally.
         </p>
         <p>
-          <a href={site.eClubhouseUrl} rel="noopener noreferrer" target="_blank">
+          <ExternalLink href={site.eClubhouseUrl}>
             Reference: chapter projects (e‑Clubhouse)
-          </a>
+          </ExternalLink>
         </p>
       </Prose>
     </>

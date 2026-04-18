@@ -1,43 +1,42 @@
-import Link from "next/link";
+import { HeaderAuthControls } from "@/components/auth/HeaderAuthControls";
+import { HeaderBrandLink } from "@/components/HeaderBrandLink";
+import { LionsLogo } from "@/components/LionsLogo";
+import { MainNavLinks } from "@/components/MainNavLinks";
 import { MobileNav } from "@/components/MobileNav";
-import { mainNav } from "@/lib/nav";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import type { SessionProfile } from "@/lib/auth/session-profile";
 import { site } from "@/lib/site";
 
-export function Header() {
+export function Header({ session }: { session: SessionProfile | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-2">
-          <span
-            className="h-2 w-2 shrink-0 rounded-full bg-primary"
-            aria-hidden
-          />
-          <span className="truncate font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground sm:text-sm">
-            {site.shortName}
+        <HeaderBrandLink
+          className="flex min-w-0 items-center gap-3 sm:gap-4"
+          ariaLabel={`${site.shortName} home`}
+        >
+          <span className="shrink-0 rounded-md dark:bg-white dark:px-2 dark:py-1.5 dark:shadow-sm dark:ring-1 dark:ring-white/20">
+            <LionsLogo
+              priority
+              className="h-8 w-auto max-w-[132px] sm:h-9 sm:max-w-[200px]"
+            />
           </span>
-        </Link>
+          <span className="min-w-0 truncate border-l border-border pl-2 font-semibold leading-tight text-foreground sm:pl-4 sm:text-sm">
+            <span className="block truncate">{site.shortName}</span>
+            <span className="mt-0.5 hidden text-xs font-normal text-muted-foreground sm:block">
+              Hancock County, KY
+            </span>
+          </span>
+        </HeaderBrandLink>
         <nav
           className="hidden items-center gap-1 md:flex"
           aria-label="Primary"
         >
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
+          <MainNavLinks />
         </nav>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/membership"
-            className="hidden text-sm font-medium text-muted-foreground transition hover:text-foreground sm:inline"
-          >
-            Sign in
-            <span className="sr-only"> (coming with member accounts)</span>
-          </Link>
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <ThemeToggle />
+          <HeaderAuthControls session={session} />
           <MobileNav />
         </div>
       </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
 import Link from "next/link";
+import { getMeetingSchedule } from "@/lib/data/chapter-content";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
     "Why join the Lewisport Lions, what to expect at meetings, and future member sign-in.",
 };
 
-export default function MembershipPage() {
+export default async function MembershipPage() {
+  const meetingSchedule = await getMeetingSchedule();
+
   return (
     <>
       <PageHeader
@@ -25,13 +28,17 @@ export default function MembershipPage() {
           County focus.
         </p>
         <h2>Meetings</h2>
-        <p>{site.meeting.schedule}</p>
+        <p className="whitespace-pre-wrap">{meetingSchedule}</p>
         <p>{site.meeting.place}</p>
-        <h2>Sign in (coming)</h2>
+        <h2>Sign in (optional)</h2>
         <p>
-          Member accounts, verified chapter status, and order history are
-          planned with Supabase Auth. Until then, reach us through{" "}
-          <Link href="/contact">Contact</Link>.
+          Accounts are <strong>optional</strong> for most of the site. Use{" "}
+          <Link href="/login">Sign in</Link> or <strong>Sign in with Google</strong>{" "}
+          in the header if you want a profile for future features (for example,
+          hiding fundraiser reminders after you order). New accounts start as{" "}
+          <strong>Guest</strong> until the chapter confirms membership.{" "}
+          <strong>Admin</strong> access is assigned by the chapter for site
+          editors.
         </p>
         <h2>Next step</h2>
         <p>

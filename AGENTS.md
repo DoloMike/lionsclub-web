@@ -7,6 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # Stack notes
 
 - Shared UI lives under `src/components/` (not under `src/app/`).
-- Supabase: `@/lib/supabase/browser` (anon, client-safe) vs `@/lib/supabase/server` (service role, `server-only`).
+- Supabase: `@/lib/supabase/browser` (anon, client-safe) vs `@/lib/supabase/admin` (service role, `server-only`), `server-client` (cookie session), `public-server` (anon reads without a user).
 - Env access goes through `src/lib/env.ts` so keys stay consistent.
+- Off-site `http(s)` links: use `@/components/ExternalLink` so `target="_blank"` and `rel="noopener noreferrer"` stay consistent (see `src/lib/leaves-site.ts`).
 - Staging / preview: set `NEXT_PUBLIC_NOINDEX=true` (headers + meta + `robots.txt`).

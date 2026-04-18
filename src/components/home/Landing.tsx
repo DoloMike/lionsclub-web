@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Container } from "@/components/Container";
+import { ExternalLink } from "@/components/ExternalLink";
+import { googleMapsSearchUrl } from "@/lib/maps-links";
 import { site } from "@/lib/site";
+
+const heroAddressMapsUrl = googleMapsSearchUrl(site.address.displayLine);
 
 const programs = [
   {
@@ -48,44 +52,71 @@ export function Landing() {
   return (
     <>
       <section
-        className="border-b border-border bg-gradient-to-b from-muted/50 to-background"
+        className="border-b border-border bg-gradient-to-b from-section-warm via-muted/30 to-background"
         aria-labelledby="hero-heading"
       >
         <Container className="py-16 sm:py-24 lg:py-28">
-          <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
-            {site.location} · {site.district}
-          </p>
-          <h1
-            id="hero-heading"
-            className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
-          >
-            Serving Hancock County as{" "}
-            <span className="text-primary">{site.shortName}</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Vision and hearing programs, youth support, scholarships, and
-            community events—we&apos;re your neighbors, improving health and
-            opportunity close to home.
-          </p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              href="/membership"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-            >
-              Join us
-            </Link>
-            <Link
-              href="/fundraising"
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-card-foreground shadow-sm transition hover:bg-muted"
-            >
-              Chicken cook orders
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-primary underline-offset-4 hover:underline"
-            >
-              Contact
-            </Link>
+          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-7">
+              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
+                {site.location} · {site.district}
+              </p>
+              <h1
+                id="hero-heading"
+                className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
+              >
+                Serving Hancock County as{" "}
+                <span className="text-primary">{site.shortName}</span>
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                Vision and hearing programs, youth support, scholarships, and
+                community events—we&apos;re your neighbors, improving health and
+                opportunity close to home.
+              </p>
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link
+                  href="/membership"
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
+                >
+                  Join us
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                >
+                  Contact
+                </Link>
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-md ring-1 ring-border/60 lg:col-span-5">
+              <div
+                className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/15 blur-2xl"
+                aria-hidden
+              />
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                In our community
+              </p>
+              <p className="mt-3 text-sm font-medium leading-relaxed text-foreground">
+                Meetings and service projects are rooted at{" "}
+                <span className="text-primary">{site.address.venue}</span>—the
+                same address we publish for pickups and chapter gatherings.
+              </p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                <ExternalLink
+                  href={heroAddressMapsUrl}
+                  className="text-muted-foreground underline-offset-2 transition hover:text-foreground hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-label={`Open ${site.address.displayLine} in Google Maps`}
+                >
+                  {site.address.displayLine}
+                </ExternalLink>
+              </p>
+              <Link
+                href="/about"
+                className="mt-5 inline-flex text-sm font-semibold text-primary underline-offset-4 hover:underline"
+              >
+                About the chapter
+              </Link>
+            </div>
           </div>
         </Container>
       </section>
@@ -146,19 +177,7 @@ export function Landing() {
           >
             Programs &amp; community service
           </h2>
-          <p className="mt-3 max-w-3xl text-muted-foreground">
-            Highlights from our chapter&apos;s public projects—short blurbs, big
-            heart.{" "}
-            <a
-              href={site.eClubhouseUrl}
-              className="font-medium text-primary underline-offset-4 hover:underline"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Chapter project list (reference)
-            </a>
-          </p>
-          <ul className="mt-10 grid gap-6 sm:grid-cols-2">
+          <ul className="mt-8 grid gap-6 sm:grid-cols-2">
             {programs.map((p) => (
               <li
                 key={p.title}
@@ -198,10 +217,9 @@ export function Landing() {
                 Chicken cook fundraiser
               </h2>
               <p className="mt-3 text-muted-foreground">
-                A recurring community fundraiser. Online ordering, pickup
-                details, and payment options will be announced here—share your
-                contact info if you&apos;d like a reminder when the next cook is
-                scheduled.
+                When a cook is scheduled, you can review dates and order online
+                with secure checkout—orders are saved only after payment. Watch
+                this section and the site banner for the next round.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -301,14 +319,12 @@ export function Landing() {
             >
               Contact about giving locally
             </Link>
-            <a
+            <ExternalLink
               href={site.lcifUrl}
               className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-card-foreground transition hover:bg-muted"
-              rel="noopener noreferrer"
-              target="_blank"
             >
               Learn about LCIF
-            </a>
+            </ExternalLink>
           </p>
         </Container>
       </section>

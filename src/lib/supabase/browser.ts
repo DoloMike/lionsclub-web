@@ -1,10 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 import { env } from "../env";
 
-// Browser-safe client (uses anon key, safe for Client Components)
-export const supabase = createClient(env.supabase.url, env.supabase.anonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+/** Browser / Client Components — anon key only. */
+export function createBrowserSupabaseClient() {
+  if (!env.supabase.url || !env.supabase.anonKey) {
+    throw new Error("Supabase URL and anon key are required");
+  }
+  return createBrowserClient(env.supabase.url, env.supabase.anonKey);
+}

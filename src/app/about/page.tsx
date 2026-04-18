@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { ExternalLink } from "@/components/ExternalLink";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
+import { getOfficers } from "@/lib/data/chapter-content";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -8,7 +10,9 @@ export const metadata: Metadata = {
   description: `Chapter story, district (${site.district}), and relationship to Lions Clubs International.`,
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const officers = await getOfficers();
+
   return (
     <>
       <PageHeader
@@ -22,11 +26,21 @@ export default function AboutPage() {
           traditions that bring neighbors together. This site is ours—we tell
           our own story; Lions Clubs International provides the global frame.
         </p>
-        <h2>Leadership &amp; governance</h2>
-        <p>
-          Officer names and photos can be added here once approved. Decisions
-          are made by members and leaders who live in the community.
-        </p>
+        <h2>Leadership</h2>
+        {officers.length === 0 ? (
+          <p>
+            Officer listings are managed by chapter admins and will appear here
+            when published.
+          </p>
+        ) : (
+          <ul>
+            {officers.map((o) => (
+              <li key={o.id}>
+                <strong>{o.name}</strong> — {o.title}
+              </li>
+            ))}
+          </ul>
+        )}
         <h2>Lions Clubs International</h2>
         <p>
           Lions is the world’s largest service club organization. LCIF (Lions
@@ -34,9 +48,7 @@ export default function AboutPage() {
           proud to be part of that network—and we lead with local impact first.
         </p>
         <p>
-          <a href={site.lcifUrl} rel="noopener noreferrer" target="_blank">
-            Learn about LCIF
-          </a>
+          <ExternalLink href={site.lcifUrl}>Learn about LCIF</ExternalLink>
         </p>
       </Prose>
     </>

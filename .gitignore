@@ -30,11 +30,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (never commit real secrets — use `.env.example` only)
 .env
 .env.local
 .env.*.local
+.env.production
 !.env.example
+
+# npm lockfile — this repo standardizes on Bun (`bun.lock`)
+package-lock.json
 
 # vercel
 .vercel
@@ -42,3 +46,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Next.js dev HTTPS (see `bun run dev:https`)
+certificates

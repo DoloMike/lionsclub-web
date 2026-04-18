@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { ExternalLink } from "@/components/ExternalLink";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Reach the Lewisport Lions Club by email or phone.",
+  description: "Reach the Lewisport Lions Club by email.",
 };
 
 export default function ContactPage() {
@@ -13,23 +14,23 @@ export default function ContactPage() {
     <>
       <PageHeader
         title="Contact"
-        description="We respond to community needs, partnerships, and questions about volunteering. Replace placeholder contact info with your chapter’s real details."
+        description="We respond to community needs, partnerships, and questions about volunteering."
       />
       <Prose>
         <p>
           <strong>Email:</strong>{" "}
-          <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+          <ExternalLink href={`mailto:${site.contact.email}`}>
+            {site.contact.email}
+          </ExternalLink>
         </p>
-        <p>
-          <strong>Phone:</strong>{" "}
-          <a href={`tel:${site.contact.phone.replace(/\D/g, "")}`}>
-            {site.contact.phone}
-          </a>
+        <p className="text-muted-foreground">
+          We don’t publish a club phone number — please email us and we’ll get
+          back to you.
         </p>
         <h2>Online form</h2>
         <p>
           A contact form with spam protection is planned for a later phase. For
-          now, please use email or phone.
+          now, please use email.
         </p>
         <h2>Nonprofit meeting space</h2>
         <p>

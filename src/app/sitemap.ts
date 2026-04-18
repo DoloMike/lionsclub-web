@@ -7,6 +7,7 @@ const paths = [
   "/events",
   "/fundraising",
   "/membership",
+  "/login",
   "/contact",
   "/privacy",
   "/terms",

@@ -1,6 +1,12 @@
 # Lewisport Lions Club — Site Planning & Specification
 
-This document guides implementation of a modern, responsive public website and future member/admin/fundraising flows for the **Lewisport Lions Club** (Kentucky, District 43-K). It is grounded in the current **`lionsclub-web`** codebase and summarized public sources ([Lewisport chapter projects](https://e-clubhouse.org/sites/lewisport/projects.php), [LCI Member Resource Center / LCIF hub](https://www.lionsclubs.org/en/member-resource-center/lcif)).
+This document guides implementation of a modern, responsive public website and future member/admin/fundraising flows for the **Lewisport Lions Club** (Kentucky, District 43-K). It is grounded in the current **`lionsclub-web`** codebase and summarized public sources ([Lewisport chapter projects](https://e-clubhouse.org/sites/lewisport/projects.php), [LCI Member Resource Center / LCIF hub](https://www.lionsclubs.org/en/member-resource-center/lcif)). For a **short status and deploy checklist**, see **[status-and-next.md](status-and-next.md)** first.
+
+---
+
+## Status snapshot (April 2026)
+
+**Canonical “what’s shipped / what’s next” (including production deploy)** lives in **[docs/status-and-next.md](status-and-next.md)**. Use that file with **`README.md`** for day-to-day alignment; the sections below are the long-form product spec and roadmap.
 
 ---
 
@@ -14,8 +20,8 @@ A civic, community-centered web presence for the Lewisport Lions Club chapter: s
 
 - **Residents and neighbors** in Lewisport / Hancock County seeking help, events, or ways to give back.
 - **Prospective members** evaluating fit and meeting logistics.
-- **Existing members** (future) for updates, resources, and order history.
-- **Club leadership** (future) for content, members, and fundraiser order management.
+- **Existing members** (member portal still planned) for updates, resources, and order history.
+- **Club leadership** — **admin UI** exists for chapter content and fundraisers; richer **orders / verification** tooling still planned.
 
 ### Primary goals
 
@@ -23,7 +29,7 @@ A civic, community-centered web presence for the Lewisport Lions Club chapter: s
 - **Clarity of mission**: vision health, youth, hunger/service, and chapter-specific programs.
 - **Conversion paths**: contact, join, donate, chicken cook orders (when live).
 - **Technical foundation**: responsive UI, **light-first pages** with **system-driven dark** (see Section 9), optional explicit **light / dark / system** user toggle later, SEO-ready metadata, accessibility, performance.
-- **Identity & governance**: eventual **auth** with **visitor / member / admin** roles and **verified member** semantics.
+- **Identity & governance**: **Admin** Google auth + `profiles` roles are live; **visitor / member / verified member** flows beyond admin are still to be productized (see [status-and-next.md](status-and-next.md)).
 
 ### Non-goals (first phase)
 
@@ -116,6 +122,8 @@ From LCI’s public positioning around **LCIF** and the **Member Resource Center
 | `/service` | Programs aligned to source list (vision, youth, hunger/community support). |
 | `/events` | Upcoming + recurring (parades, screenings); can start as static/MDX. |
 | `/fundraising` | Chicken cook and other campaigns (overview + rules + how to pay). |
+| `/fundraising/order` | Guest chicken checkout (Stripe) when an event is open. |
+| `/fundraising/order/return` | Post–Stripe Checkout return surface. |
 | `/membership` | Why join, expectations, meeting info, link to auth/sign-up. |
 | `/contact` | Form + email/phone + social (as available). |
 | `/privacy` | Data handling once auth/orders exist. |
@@ -164,7 +172,7 @@ Each section: **purpose**, **key message**, **CTA**.
 
 - **Purpose**: Immediate clarity of who you are and what a visitor should do next.
 - **Key message**: “Lewisport Lions Club serves Hancock County through vision programs, youth support, and community events.”
-- **CTA**: Primary: **Join us** → `/membership`. Secondary: **Chicken cook orders** → `/fundraising`. Tertiary: **Contact** → `/contact`.
+- **CTA**: Primary: **Join us** → `/membership`. Secondary: **Contact** → `/contact`. (Fundraising is linked from the dedicated fundraiser section lower on the page and site-wide banner when live—not a third hero button in the current implementation.)
 
 ### Mission / impact
 
@@ -214,15 +222,15 @@ Each section: **purpose**, **key message**, **CTA**.
 
 ### Recommended approach (aligned to this repo)
 
-The project already standardizes on **Supabase** (`@supabase/supabase-js`, split clients in `src/lib/supabase/browser.ts` and `src/lib/supabase/server.ts`, `env` in `src/lib/env.ts`). **Use Supabase Auth** as the primary identity provider:
+The project standardizes on **Supabase** (`@supabase/supabase-js`, `@supabase/ssr`, clients under `src/lib/supabase/*`, `env` in `src/lib/env.ts`). **Supabase Auth** is the identity provider:
 
-- **Email + password** via Supabase.
-- **Google** via Supabase provider (OAuth). **Google One Tap** can be layered in the client by obtaining a Google ID token and exchanging it for a Supabase session (`signInWithIdToken` pattern—implementation detail for a later phase).
+- **Today:** **Google OAuth** for **chapter admins** (`/admin/login`, `/auth/callback`, cookie refresh in `middleware.ts`).
+- **Planned / optional:** **Email + password** for members or officers; **Google One Tap** via `signInWithIdToken` when product requirements settle.
 
 **Repository conventions to preserve**
 
 - Browser-only anon client for user-scoped calls under **RLS**.
-- **`supabaseAdmin`** service role **only** on the server for privileged tasks (role promotion, verification overrides, admin reports)—never import `server.ts` in Client Components (already enforced via `server-only`).
+- **`getSupabaseAdmin()`** (service role) **only** on the server for privileged tasks — never import `@/lib/supabase/admin` in Client Components (enforced via `server-only`).
 
 ### Google One Tap + email/password coexistence
 
@@ -275,11 +283,15 @@ Suggested flow:
 
 ### Likely admin pages
 
-- **Dashboard**: counts (open orders, pending verifications), recent activity.
-- **Orders**: filter by status/event/pickup date; export CSV.
-- **Members**: search users, view verification state, approve/revoke.
+**Implemented today:** `/admin` (dashboard copy), `/admin/settings` (meeting schedule text), `/admin/social`, `/admin/officers`, `/admin/events`, `/admin/fundraiser` (chicken events + commerce fields), **`/admin/fundraiser/[eventId]/stats`** (totals + order table + link to CSV download).
+
+**Still to build or deepen:** Cross-event **`/admin/orders`** hub (optional), **Members** / verification queue UI, metrics on the dashboard, optional **Announcements** CMS if not folded into events.
+
+- **Dashboard**: counts (open orders, pending verifications), recent activity — *partially stubbed*.
+- **Orders**: per-event stats + **CSV export** shipped; cross-event list/filter UI — *optional future*.
+- **Members**: search users, view verification state, approve/revoke — *planned*.
 - **Announcements** (optional): CRUD for landing “news” items.
-- **Settings**: pickup location defaults, active fundraiser toggles, pricing tiers (guarded).
+- **Settings**: pickup location defaults, active fundraiser toggles, pricing tiers (guarded) — *split between `settings` + `fundraiser` today*.
 
 ### Admin capabilities
 
@@ -306,58 +318,44 @@ Suggested flow:
 
 ## 8. Chicken Cook Ordering Plan
 
-### User flow (authenticated-first recommendation)
+### Implemented user flow (repo)
 
-**Assumption (labelled)**: **Require sign-in** to place orders (simpler abuse prevention, clearer audit trail, aligns with “member identity” goals). Optional **guest checkout** could be a later enhancement behind CAPTCHA and stricter rate limits.
+1. Visitor reads **`/fundraising`** and follows **Place an order** → **`/fundraising/order`**.
+2. **No account required** — collects order fields needed for pickup + **Stripe Checkout** for payment.
+3. Order row is persisted **after** successful payment (see `chicken_orders` + Stripe session id in migration `20260418150000_chicken_orders.sql` and app API routes).
+4. **`/fundraising/order/return`** handles the browser return from Stripe.
 
-1. User visits `/fundraising` → selects active **cook event**.
-2. **Sign in** (Google One Tap or email/password).
-3. **Order form**: quantity, optional notes, acknowledgment of pickup rules.
-4. **Confirmation** screen + email (via Supabase function or transactional provider).
-5. **Order history** on `/member/orders`.
+Admins create/configure events under **`/admin/fundraiser`** (`order_open`, pricing, inventory, pickup copy).
 
-### Fields (likely)
+### Earlier design alternative (not the default today)
 
-- `event_id` (which cook)
-- `user_id`
-- `quantity` (integer; validate min/max per household if policy exists)
-- `unit_price_cents` snapshot at order time
-- `total_cents`
-- `status` (see lifecycle)
-- `customer_phone` (if not already on profile)
-- `pickup_window` selection (if multiple)
-- `special_requests` (short text, moderated)
-- `internal_notes` (admin-only)
-- `created_at`, `updated_at`
-- `payment_status` (`unpaid`, `paid`, `waived`, `refunded`) **Assumption** until payments integrated.
+**Original assumption:** require sign-in (Google One Tap / email) before checkout and expose **`/member/orders`**. That path remains a valid future enhancement if the chapter wants tighter identity or repeat-buyer UX.
 
-### Status lifecycle
+### Fields (database-aligned)
 
-Suggested states:
+- **Event:** `fundraiser_events` — title, slug, dates, pickup text, `price_cents_per_unit`, `max_units_per_order`, optional `inventory_units`, `order_open`, etc.
+- **Order:** `chicken_orders` — `event_id`, `quantity`, `unit_price_cents`, `total_cents`, `customer_name` / `customer_email` / `customer_phone`, `notes`, optional `user_id`, `stripe_checkout_session_id`, `status`, timestamps (see migration for full constraints).
 
-1. `pending` — created, awaiting confirmation/payment policy.
-2. `confirmed` — club acknowledged (auto or manual).
-3. `ready` — ready for pickup notification (optional).
-4. `completed` — picked up / fulfilled.
-5. `cancelled` — user or admin cancelled.
+### Status lifecycle (implemented check constraint)
 
-**Guards**: disallow edits after `ready` except admin; cap quantity per user per event unless admin overrides.
+States include: `pending_payment`, `paid`, `confirmed`, `ready`, `completed`, `cancelled` — align admin tooling and public copy with these names.
+
+**Guards:** enforce inventory / max-per-order at checkout in application or RPC layer; disallow destructive edits after fulfillment except via admin.
 
 ### Admin workflow
 
-- Table of orders by event; bulk export; mark paid; cancel with reason; contact user (mailto/phone from profile—respect privacy).
+- Configure events and inventory; view or export orders by event; update statuses for kitchen/pickup; handle cancellations and edge cases (refunds may go through Stripe dashboard until in-app refund flows exist).
 
 ### Edge cases & safeguards
 
-- **Oversell**: enforce max inventory at checkout with transactional RPC (Postgres function) to prevent race conditions.
-- **Waitlist**: optional if inventory hits zero.
-- **Pickup no-shows**: policy copy on site; admin flag `no_show`.
-- **Duplicate accounts**: mitigation via verified phone/email and admin merge tool (future).
+- **Oversell:** transactional decrement or server-side validation before creating Checkout sessions.
+- **Waitlist:** optional if inventory hits zero.
+- **Pickup no-shows:** policy copy on site; optional `no_show` flag later.
+- **Abuse:** rate limits on checkout creation; CAPTCHA if needed later.
 
-### Guest checkout?
+### Guest checkout
 
-- **Default recommendation**: **No** for Phase 4; require auth.
-- **If added later**: still collect phone + email + CAPTCHA; map to ephemeral guest record; higher fraud risk.
+- **Shipped:** guest checkout is the **default** path today (with Stripe). Optional future: link orders to logged-in members when a member portal exists.
 
 ---
 
@@ -365,28 +363,24 @@ Suggested states:
 
 ### App structure within `lionsclub-web`
 
-Current layout (from `README.md` and repo):
-
-```text
-src/
-  app/            # routes, layouts, metadata, robots, sitemap
-  components/     # Header, Footer, shared UI
-  lib/            # env, supabase clients
-```
-
-Suggested extensions (incremental):
+**Current layout (April 2026):**
 
 ```text
 src/
   app/
-    (public)/...           # optional route groups for marketing pages
-    (member)/member/...    # authenticated member subtree + layout
-    (admin)/admin/...      # admin subtree + layout
-    api/...                # route handlers (webhooks, health already exists)
-  components/ui/           # reusable primitives (buttons, inputs)
-  lib/auth/                # session helpers (getUser, requireRole)
-  styles/                  # only if globals grow unwieldy
+    (public pages at top level: about, contact, events, fundraising, membership, …)
+    admin/                 # /admin/login + (protected) settings, social, officers, events, fundraiser
+    auth/callback/         # Supabase OAuth exchange
+    api/                   # health, Stripe checkout, admin fundraiser CSV export
+  components/              # Header, Footer, Landing, admin/*, LionsLogo, SocialIcon, ExternalLink, JsonLd, …
+  lib/
+    supabase/              # browser, server-client, admin, public-server
+    auth/                  # getSessionAdmin, assert-admin, …
+    data/                  # chapter content, fundraiser queries
+  middleware.ts            # Supabase cookie refresh (watch Next.js middleware → proxy migration notes)
 ```
+
+**Still optional / future:** route groups `(public)/`, `(member)/member/...`, dedicated `components/ui/` barrel, extra `styles/` split if CSS grows.
 
 **Theme strategy (important repo note)**
 
@@ -409,7 +403,7 @@ src/
 
 - **Supabase Auth** (Google + email/password).
 - **Email**: Supabase Auth emails + Resend/SendGrid later for order receipts (decision).
-- **Payments** (future): Stripe Checkout or Square—out of Phase 1; design order schema to add `external_payment_id` later.
+- **Payments:** **Stripe Checkout** is integrated for chicken orders when `STRIPE_SECRET_KEY` is configured; extend webhooks and reconciliation as needed.
 - **Analytics**: privacy-conscious Plausible or GA4—cookie banner if required.
 
 ### Accessibility, performance, SEO
@@ -423,29 +417,35 @@ src/
 
 ## 10. Phased Implementation Plan
 
+Phases below are the **original roadmap**; see **[status-and-next.md](status-and-next.md)** for current shipped vs next, then the **Status** column in each phase for historical comparison.
+
 ### Phase 1 — Landing + foundation
 
 - **Scope**: IA routes (static shells acceptable), redesigned landing per Section 5, **light-first + system-dark** theming (Section 9), accessible navigation, chapter-specific metadata, content stubs grounded in Section 2.
 - **Dependencies**: approved copy, a handful of photos or placeholders, NAP confirmation.
 - **Success criteria**: Lighthouse accessibility ≥ 90 on key pages (reasonable target), responsive review, stakeholders sign off on tone and structure.
+- **Status (Apr 2026):** **Largely complete** — public IA, landing, theming, LCI branding, JSON-LD, and navigation are in place; keep iterating on copy, imagery, and Lighthouse numbers.
 
 ### Phase 2 — Auth + roles
 
 - **Scope**: Supabase Auth providers (Google + email/password), profile table, role + verification flags, member layout shell, protected routes, One Tap evaluation behind feature flag.
 - **Dependencies**: Supabase project configuration (OAuth client IDs), email templates, privacy policy.
 - **Success criteria**: test accounts can sign in/out; RLS prevents cross-user data reads; verification flow works end-to-end.
+- **Status (Apr 2026):** **Partial** — **Google admin** sign-in + `profiles` + RLS patterns exist; **club member** sign-in, verification UX, and One Tap are **not** finished as originally scoped.
 
 ### Phase 3 — Admin
 
 - **Scope**: `/admin` area, verification queue, announcements CRUD (if chosen), audit log for role changes.
 - **Dependencies**: at least two admin users bootstrapped; operational training doc for officers.
 - **Success criteria**: non-technical admin can verify a member and post an announcement without developer help (if CMS path chosen).
+- **Status (Apr 2026):** **Partial** — meeting text, social links, officers, events, and **fundraiser** (chicken events) admin screens exist; **member verification queue** and **announcements CMS** (if distinct from events) remain open.
 
 ### Phase 4 — Chicken ordering
 
 - **Scope**: fundraiser events, inventory-safe ordering, emails, member order history, admin fulfillment tools, exports.
 - **Dependencies**: pricing rules, pickup logistics, legal/tax questions resolved for receipts.
 - **Success criteria**: dry-run event completes with ≥ N test orders, no oversell in concurrency test, admin can export final pickup list.
+- **Status (Apr 2026):** **Partial** — DB schema, admin event config, **guest Stripe checkout**, return route, **per-event stats page**, and **CSV export** are implemented; **transactional email** (beyond Stripe’s optional receipt), **member order history**, and hard **inventory RPC** guarantees may still need work for production scale.
 
 ---
 
@@ -468,37 +468,31 @@ src/
 
 ### Documented assumptions
 
-- Manual **member verification** initially.
-- **Authenticated orders** first; guest checkout deferred.
-- Payments may be **manual** initially with `payment_status` tracked administratively.
+- Manual **member verification** initially (when a member portal ships).
+- **Guest Stripe checkout** for chicken orders is the **current** implementation; optional member-linked orders later.
+- **Stripe** handles payment capture; chapter-specific refund / cash-exception flows may still use manual processes alongside dashboard tools.
 - Public UI is **light by default** in authored styles; **dark styling** applies when the OS reports **dark** via `prefers-color-scheme` (see Section 9).
 
 ---
 
 ## 12. Cursor Handoff Notes
 
-### Concrete next steps after approval
+### Suggested next engineering priorities (post–Phase 1)
 
-1. **Design tokens + system appearance**: reconcile `globals.css` variables with Tailwind usage; implement **light-first** surfaces and **`prefers-color-scheme: dark`** overrides end-to-end (optional `light` / `dark` / `system` user toggle + persistence can follow).
-2. **Landing page rebuild** in `src/app/page.tsx` using shared components under `src/components/` per `AGENTS.md`.
-3. **Expand navigation** in `Header.tsx`; enrich `Footer.tsx` with chapter + legal links.
-4. **Add routes** under `src/app/` for About, Service, Events, Fundraising, Membership, Contact with scaffolded content from Sections 2 and 5.
-5. **Update `metadata`** in `src/app/layout.tsx` and extend `sitemap.ts` as new pages ship.
-6. Prepare **`supabase/`** directory for SQL migrations when auth/tables arrive (`README.md` already suggests this pattern).
+1. **Chicken ops:** transactional email on paid orders (if Stripe dashboard receipts are not enough); optional cross-event **admin orders** list; tighten inventory / concurrency (RPC or Stripe metadata checks) if not already strict enough for production traffic.
+2. **Member / identity (Phase 2 remainder):** member sign-in surfaces (if desired), verification queue UI, and optional linking of `chicken_orders.user_id` when a member session exists.
+3. **Polish & trust:** expand `privacy` / `terms` as real auth and payments land; keep `NEXT_PUBLIC_APP_URL` aligned with HTTP vs HTTPS dev (`README.md`).
+4. **SEO:** extend `sitemap.ts` if new top-level routes appear; validate JSON-LD in Rich Results / Search Console once deployed.
 
-### Suggested order of work
+### Files/folders commonly touched for the above
 
-Light-first theme + layout shell (with system dark overrides) → landing sections → additional static pages → SEO pass → then Supabase auth schema/RLS (Phase 2).
-
-### Files/folders likely to be touched early
-
-- `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`
-- `src/components/Header.tsx`, `src/components/Footer.tsx`
-- New: `src/app/about/page.tsx`, `src/app/service/page.tsx`, … (paths per IA)
-- Later: `src/lib/supabase/*`, new `src/lib/auth/*`, `src/middleware.ts` (if introduced for session refresh—evaluate Next 16 guidance in-repo `AGENTS.md` note about reading `node_modules/next/dist/docs/` when implementing)
+- `src/app/fundraising/order/*`, `src/app/admin/(protected)/fundraiser/*`, `src/app/api/**` (Stripe)
+- `supabase/migrations/*` (RLS, functions)
+- `src/lib/data/fundraiser.ts`, `src/components/admin/*`
+- `src/middleware.ts` (session) — watch Next.js guidance on `middleware` vs `proxy`
 
 ---
 
 ## Recommended Next Build Step
 
-**Implement Phase 1 foundation in the existing Next.js app**: introduce coherent **design tokens** with **light-first** page chrome (explicit light backgrounds/text/borders) and **dark overrides driven by `prefers-color-scheme: dark`**—fixing the current mismatch where `globals.css` suggests system theming but several routes use **dark-only** zinc classes—then rebuild **`src/app/page.tsx`** into the Section **5** landing structure with responsive **Header/Footer** navigation for the Section **4** IA—all static content first, grounded in the summarized Lewisport programs, **without** auth or ordering logic yet.
+**Harden and operate chicken fundraising:** optional unified **admin orders** view across events (stats + CSV exist per event today); add **paid-order email** from the app if chapter branding is required beyond Stripe receipts (Supabase Edge Function, Resend, or similar); **load-test / review inventory rules** so checkout cannot oversell under concurrency. Run a full **dry-run event** on staging with real Stripe test keys before promoting config to production.
