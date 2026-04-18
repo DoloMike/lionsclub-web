@@ -7,7 +7,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-emerald-400" />
           <span className="font-mono text-sm tracking-widest text-zinc-400 uppercase">
-            webapp-template
+            Lions Club
           </span>
         </Link>
         <nav className="flex gap-6 text-sm text-zinc-500">

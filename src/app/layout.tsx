@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Web App Template",
-  description: "Barebones web app template — Next.js, Tailwind, Supabase, Docker, Nginx",
+  title: "Lions Club",
+  description: "Lions Club web — Next.js, Tailwind, Supabase, Docker, Nginx",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),

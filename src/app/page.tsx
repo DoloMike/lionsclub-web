@@ -4,11 +4,11 @@ export default function Home() {
       <div className="w-full max-w-xl text-center">
         {/* Heading */}
         <h1 className="mb-4 text-5xl font-bold tracking-tight text-white">
-          Hello, World.
+          Lions Club
         </h1>
 
         <p className="mb-10 text-lg leading-relaxed text-zinc-400">
-          A barebones web app template — Next.js, Tailwind, Supabase, Docker &amp; Nginx.
+          Next.js, Tailwind, Supabase, Docker &amp; Nginx — ready for your club content and flows.
         </p>
 
         {/* Tech Stack Pills */}

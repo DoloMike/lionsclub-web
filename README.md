@@ -1,6 +1,6 @@
-# webapp-template
+# lionsclub-web
 
-Starter for **Next.js + TypeScript + Tailwind + Supabase + Bun + Docker**, aligned with patterns used in larger App Router apps (env module, split Supabase clients, `robots` / `sitemap`, health check, Vitest).
+Lions Club web app — **Next.js + TypeScript + Tailwind + Supabase + Bun + Docker**, bootstrapped from [webapp-template](https://github.com/dolomikeclaw/webapp-template) (env module, split Supabase clients, `robots` / `sitemap`, health check, Vitest).
 
 ## Stack
 
