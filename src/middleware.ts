@@ -6,7 +6,11 @@ export async function middleware(request: NextRequest) {
     request,
   });
 
-  const url = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  // Use the PUBLIC URL so the cookie key prefix matches what the browser client
+  // and callback route use (both derived from NEXT_PUBLIC_SUPABASE_URL).
+  // Cookie names are URL-derived; using internal URL here would cause the
+  // middleware to read different cookie keys than the callback set.
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !anonKey) {
     return supabaseResponse;

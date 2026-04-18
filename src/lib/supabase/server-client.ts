@@ -19,7 +19,10 @@ export async function createSupabaseServerClient() {
     return hostname === "localhost" ? undefined : hostname;
   })();
 
-  const url = env.supabase.internalUrl || env.supabase.url;
+  // Use the PUBLIC URL so session cookie key prefix matches the browser client
+  // and callback exchange. Cookie names are URL-derived; using internal URL
+  // would cause SSR reads to miss cookies set with public URL keys.
+  const url = env.supabase.url;
   return createServerClient(url, env.supabase.anonKey, {
     cookieOptions: {
       path: "/",
