@@ -32,6 +32,10 @@ function publicSupabaseUrl(): string {
 /** Browser / Client Components — anon key only. */
 export function createBrowserSupabaseClient() {
   return createBrowserClient(publicSupabaseUrl(), env.supabase.anonKey, {
+    auth: {
+      detectSessionInUrl: true,
+      flowType: "pkce",
+    },
     cookieOptions: {
       path: "/",
       sameSite: "lax",
