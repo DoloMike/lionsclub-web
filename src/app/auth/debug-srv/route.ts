@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 
 /**
  * Debug endpoint to check session state from server-side cookies.
- * Accessible at /auth/debug-srv?secret=<8-char-prefix>
+ * Accessible at /auth/debug-srv?secret=sb_secre
  */
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret");
@@ -19,15 +19,6 @@ export async function GET(request: NextRequest) {
     userId: user?.id ?? null,
     userEmail: user?.email ?? null,
     error: error?.message ?? null,
-    cookies: request.cookies.getAll().map((c) => ({
-      name: c.name,
-      valuePrefix: c.value.slice(0, 8) + "...",
-      httpOnly: c.httpOnly,
-      sameSite: c.sameSite,
-      path: c.path,
-      domain: c.domain,
-      secure: c.secure,
-      maxAge: c.maxAge,
-    })),
+    cookieNames: request.cookies.getAll().map((c) => c.name),
   });
 }
