@@ -9,12 +9,29 @@ function publicCookieDomain(): string | undefined {
   return hostname === "localhost" ? undefined : hostname;
 }
 
-/** Browser / Client Components — anon key only. */
-export function createBrowserSupabaseClient() {
+function publicSupabaseUrl(): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!env.supabase.url || !env.supabase.anonKey) {
     throw new Error("Supabase URL and anon key are required");
   }
-  return createBrowserClient(env.supabase.url, env.supabase.anonKey, {
+
+  if (!appUrl) return env.supabase.url;
+
+  const { hostname, origin } = new URL(appUrl);
+
+  // In production/public environments, force browser auth traffic onto the
+  // app origin so refresh/token calls stay same-origin and avoid PNA/CORS
+  // issues against the separate db subdomain.
+  if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+    return origin;
+  }
+
+  return env.supabase.url;
+}
+
+/** Browser / Client Components — anon key only. */
+export function createBrowserSupabaseClient() {
+  return createBrowserClient(publicSupabaseUrl(), env.supabase.anonKey, {
     cookieOptions: {
       path: "/",
       sameSite: "lax",
