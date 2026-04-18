@@ -60,12 +60,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getSessionProfile();
-  const [meetingSchedule, socialLinks, fundraiserBannerSegments] = await Promise.all([
+  const [session, meetingSchedule, socialLinks] = await Promise.all([
+    getSessionProfile(),
     getMeetingSchedule(),
     getSocialLinks(),
-    getFundraiserBannerSegments(session),
   ]);
+  const fundraiserBannerSegments = await getFundraiserBannerSegments(session);
 
   return (
     <html

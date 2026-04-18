@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import type { SessionProfile } from "@/lib/auth/session-profile";
 import { formatInstantInTimezone, getTodayYmdInTimezone } from "@/lib/datetime";
 import { env } from "@/lib/env";
@@ -140,30 +141,42 @@ function buildPostDeadlineSegment(rows: Row[]): FundraiserBannerSegment {
  * deadline until pickup day. Signed-in users who already have a paid order for an event
  * are not shown that event.
  */
+const getCachedOpenFundraiserRows = unstable_cache(
+  async (today: string): Promise<Row[]> => {
+    const supabase = createPublicServerClient();
+    if (!supabase) return [];
+
+    const { data: rows, error } = await supabase
+      .from("fundraiser_events")
+      .select(
+        "id, title, event_date, orders_close_date, orders_close_at, pickup_starts_at, pickup_location, order_open"
+      )
+      .eq("order_open", true)
+      .gt("event_date", today);
+
+    if (error || !rows?.length) return [];
+    return rows as Row[];
+  },
+  ["fundraiser-banner-open-events"],
+  { revalidate: 300 }
+);
+
 export async function getFundraiserBannerSegments(
   session: SessionProfile | null
 ): Promise<FundraiserBannerSegment[]> {
-  const supabase = createPublicServerClient();
-  if (!supabase) return [];
-
   const tz = env.siteTimezone;
   const today = getTodayYmdInTimezone(tz);
   const nowMs = Date.now();
 
-  const { data: rows, error } = await supabase
-    .from("fundraiser_events")
-    .select(
-      "id, title, event_date, orders_close_date, orders_close_at, pickup_starts_at, pickup_location, order_open"
-    )
-    .eq("order_open", true)
-    .gt("event_date", today);
+  const [rows, paidIds] = await Promise.all([
+    getCachedOpenFundraiserRows(today),
+    getPaidChickenOrderEventIdsForUser(
+      session?.user.id,
+      session?.user.email ?? undefined
+    ),
+  ]);
 
-  if (error || !rows?.length) return [];
-
-  const paidIds = await getPaidChickenOrderEventIdsForUser(
-    session?.user.id,
-    session?.user.email ?? undefined
-  );
+  if (!rows.length) return [];
 
   const ordering: Row[] = [];
   const postDeadline: Row[] = [];

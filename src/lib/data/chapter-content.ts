@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { createPublicServerClient } from "@/lib/supabase/public-server";
 import { defaultSocialLinks, site } from "@/lib/site";
 
@@ -25,20 +26,28 @@ export type SocialLinkRow = {
   sort_order: number;
 };
 
+const getCachedMeetingSchedule = unstable_cache(
+  async (): Promise<string> => {
+    const supabase = createPublicServerClient();
+    if (!supabase) return site.meeting.schedule;
+
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("meeting_schedule")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error || !data?.meeting_schedule?.trim()) {
+      return site.meeting.schedule;
+    }
+    return data.meeting_schedule;
+  },
+  ["meeting-schedule"],
+  { revalidate: 300 }
+);
+
 export async function getMeetingSchedule(): Promise<string> {
-  const supabase = createPublicServerClient();
-  if (!supabase) return site.meeting.schedule;
-
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select("meeting_schedule")
-    .eq("id", 1)
-    .maybeSingle();
-
-  if (error || !data?.meeting_schedule?.trim()) {
-    return site.meeting.schedule;
-  }
-  return data.meeting_schedule;
+  return getCachedMeetingSchedule();
 }
 
 export async function getOfficers(): Promise<OfficerRow[]> {
@@ -67,32 +76,40 @@ export async function getChapterEvents(): Promise<ChapterEventRow[]> {
   return data;
 }
 
+const getCachedSocialLinks = unstable_cache(
+  async (): Promise<SocialLinkRow[]> => {
+    const supabase = createPublicServerClient();
+    if (!supabase) {
+      return defaultSocialLinks.map((s, i) => ({
+        id: `fallback-${i}`,
+        label: s.label,
+        url: s.url,
+        icon_key: s.icon_key,
+        sort_order: i + 1,
+      }));
+    }
+
+    const { data, error } = await supabase
+      .from("social_links")
+      .select("id, label, url, icon_key, sort_order")
+      .order("sort_order", { ascending: true });
+
+    if (error || !data?.length) {
+      return defaultSocialLinks.map((s, i) => ({
+        id: `fallback-${i}`,
+        label: s.label,
+        url: s.url,
+        icon_key: s.icon_key,
+        sort_order: i + 1,
+      }));
+    }
+
+    return data;
+  },
+  ["social-links"],
+  { revalidate: 300 }
+);
+
 export async function getSocialLinks(): Promise<SocialLinkRow[]> {
-  const supabase = createPublicServerClient();
-  if (!supabase) {
-    return defaultSocialLinks.map((s, i) => ({
-      id: `fallback-${i}`,
-      label: s.label,
-      url: s.url,
-      icon_key: s.icon_key,
-      sort_order: i + 1,
-    }));
-  }
-
-  const { data, error } = await supabase
-    .from("social_links")
-    .select("id, label, url, icon_key, sort_order")
-    .order("sort_order", { ascending: true });
-
-  if (error || !data?.length) {
-    return defaultSocialLinks.map((s, i) => ({
-      id: `fallback-${i}`,
-      label: s.label,
-      url: s.url,
-      icon_key: s.icon_key,
-      sort_order: i + 1,
-    }));
-  }
-
-  return data;
+  return getCachedSocialLinks();
 }
