@@ -264,7 +264,7 @@ export function HeaderAuthControls({
       itp_support: true,
       // Chrome (incl. Android): FedCM is the supported path for One Tap; improves odds the
       // prompt appears. Dev keeps this off to reduce Strict Mode / FedCM AbortError noise.
-      use_fedcm_for_prompt: process.env.NODE_ENV === "production",
+      use_fedcm_for_prompt: false,
     });
 
     const promptTimer = window.setTimeout(() => {
