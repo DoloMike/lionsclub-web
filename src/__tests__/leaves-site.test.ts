@@ -33,4 +33,19 @@ describe("leavesSiteForNewTab", () => {
   it("returns true for https URLs when app URL is unset", () => {
     expect(leavesSiteForNewTab("https://example.com")).toBe(true);
   });
+
+  it("returns true when href cannot be parsed as URL", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://club.example.org");
+    expect(leavesSiteForNewTab("http://[")).toBe(true);
+  });
+
+  it("returns false for non-http(s) URL protocols", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://club.example.org");
+    expect(leavesSiteForNewTab("ftp://example.com/a")).toBe(false);
+  });
+
+  it("returns true when NEXT_PUBLIC_APP_URL is not a valid URL", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", ":::");
+    expect(leavesSiteForNewTab("https://www.lionsclubs.org/")).toBe(true);
+  });
 });

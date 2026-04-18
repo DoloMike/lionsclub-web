@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
     cookieOptions: {
       path: "/",
       sameSite: "lax",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       domain: appHostname,
     },
     cookies: {
