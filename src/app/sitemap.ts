@@ -1,17 +1,28 @@
 import type { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
-    /\/$/,
-    ""
-  );
+const paths = [
+  "",
+  "/about",
+  "/service",
+  "/events",
+  "/fundraising",
+  "/membership",
+  "/contact",
+  "/privacy",
+  "/terms",
+] as const;
 
-  return [
-    {
-      url: base,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-  ];
+export default function sitemap(): MetadataRoute.Sitemap {
+  const base = (
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ).replace(/\/$/, "");
+
+  const now = new Date();
+
+  return paths.map((path, i) => ({
+    url: `${base}${path}`,
+    lastModified: now,
+    changeFrequency: path === "" ? "weekly" : "monthly",
+    priority: path === "" ? 1 : Math.max(0.5, 0.9 - i * 0.05),
+  }));
 }

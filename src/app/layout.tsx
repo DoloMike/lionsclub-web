@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { defaultDescription, site } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +18,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lions Club",
-  description: "Lions Club web — Next.js, Tailwind, Supabase, Docker, Nginx",
+  title: {
+    default: site.name,
+    template: `%s | ${site.shortName}`,
+  },
+  description: defaultDescription,
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
@@ -39,9 +43,14 @@ export default function RootLayout({
           <meta name="robots" content="noindex, nofollow" />
         ) : null}
       </head>
-      <body className="flex min-h-full flex-col">
+      <body className="relative flex min-h-full flex-col bg-background text-foreground">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <Header />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>
