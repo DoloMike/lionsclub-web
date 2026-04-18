@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { env } from "lib/env";
+import { env } from "@/lib/env";
 
 const DEBUG_CODE = env.supabase.serviceRoleKey?.slice(0, 8) ?? "debug";
 
