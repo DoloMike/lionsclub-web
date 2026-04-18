@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
+import type { SessionProfile } from "@/lib/auth/session-profile";
+import { env } from "@/lib/env";
 import { isNavHrefActive, mainNav, mobileNavLinkClassName } from "@/lib/nav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 function getFocusable(panel: HTMLElement): HTMLElement[] {
   return Array.from(
@@ -11,9 +16,11 @@ function getFocusable(panel: HTMLElement): HTMLElement[] {
   );
 }
 
-export function MobileNav() {
+export function MobileNav({ session }: { session: SessionProfile | null }) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+  const { pending: googlePending, signIn } = useGoogleOAuthSignIn();
+  const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
@@ -74,11 +81,15 @@ export function MobileNav() {
   }, [open]);
 
   return (
-    <div className="flex items-center md:hidden">
+    <div className="flex shrink-0 items-center md:hidden">
       <button
         ref={menuButtonRef}
         type="button"
-        className="inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+        className={
+          open
+            ? "inline-flex items-center justify-center rounded-md border-2 border-primary bg-background px-3 py-2 text-sm font-semibold text-foreground shadow-md ring-2 ring-primary/25 transition hover:bg-muted"
+            : "inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+        }
         aria-expanded={open}
         aria-controls="mobile-nav-panel"
         onClick={() => setOpen((o) => !o)}
@@ -110,34 +121,67 @@ export function MobileNav() {
       </button>
       {open ? (
         <>
+          {/* Below the sticky header only — a full-screen inset-0 layer sat above the logo
+              (later in DOM + z-30) and made the bar + close control look grayed out. */}
           <div
-            className="fixed inset-0 z-30 bg-black/40"
+            className="fixed inset-x-0 bottom-0 top-14 z-30 bg-black/40 sm:top-16"
             aria-hidden
             onClick={() => setOpen(false)}
           />
           <nav
             ref={panelRef}
             id="mobile-nav-panel"
-            className="absolute left-0 right-0 top-full z-50 max-h-[min(70vh,calc(100dvh-5rem))] overflow-y-auto border-b border-border bg-card shadow-lg"
+            className="fixed inset-x-0 top-14 z-50 flex max-h-[calc(100dvh-3.5rem)] flex-col overflow-hidden border-b border-border bg-card shadow-lg sm:top-16"
             aria-label="Mobile"
           >
-            <ul className="flex flex-col gap-1 px-4 py-4">
-              {mainNav.map((item) => {
-                const active = isNavHrefActive(pathname, item.href);
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={mobileNavLinkClassName(active)}
-                      aria-current={active ? "page" : undefined}
-                      onClick={() => setOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="min-h-0 overflow-y-auto">
+              <ul className="flex flex-col gap-1 px-4 py-4">
+                {mainNav.map((item) => {
+                  const active = isNavHrefActive(pathname, item.href);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={mobileNavLinkClassName(active)}
+                        aria-current={active ? "page" : undefined}
+                        onClick={() => setOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div className="shrink-0 space-y-4 border-t border-border bg-muted/20 px-4 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Appearance
+                </p>
+                <div className="mt-2">
+                  <ThemeToggle menuAlign="start" />
+                </div>
+              </div>
+              {!session && hasSupabase ? (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Account
+                  </p>
+                  <GoogleSignInButton
+                    variant="full"
+                    className="mt-2 w-full"
+                    pending={googlePending}
+                    pendingLabel="Signing in…"
+                    onClick={() => {
+                      void signIn();
+                      setOpen(false);
+                    }}
+                  >
+                    Sign in with Google
+                  </GoogleSignInButton>
+                </div>
+              ) : null}
+            </div>
           </nav>
         </>
       ) : null}

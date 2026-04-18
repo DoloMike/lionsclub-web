@@ -9,6 +9,7 @@ import type { SessionProfile } from "@/lib/auth/session-profile";
 import { isAdminRole, isChapterMember, roleLabel } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 function readMetaString(
@@ -216,7 +217,8 @@ export function HeaderAuthControls({
 }) {
   const router = useRouter();
   const [gsiLoaded, setGsiLoaded] = useState(false);
-  const [oauthPending, setOauthPending] = useState(false);
+  const { pending: oauthPending, signIn: signInWithGoogleOAuth } =
+    useGoogleOAuthSignIn();
   const [signOutPending, setSignOutPending] = useState(false);
 
   const clientId = env.googleClientId;
@@ -279,24 +281,6 @@ export function HeaderAuthControls({
     };
   }, [gsiLoaded, clientId, session, router]);
 
-  const signInWithGoogleOAuth = useCallback(async () => {
-    if (!hasSupabase) return;
-    setOauthPending(true);
-    try {
-      const supabase = createBrowserSupabaseClient();
-      const origin = window.location.origin;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${origin}/auth/callback?next=/`,
-        },
-      });
-      if (error) console.error(error);
-    } finally {
-      setOauthPending(false);
-    }
-  }, [hasSupabase]);
-
   const signOut = useCallback(async () => {
     if (!hasSupabase) return;
     setSignOutPending(true);
@@ -332,14 +316,19 @@ export function HeaderAuthControls({
           onLoad={() => setGsiLoaded(true)}
         />
       ) : null}
-      <GoogleSignInButton
-        variant="compact"
-        pending={oauthPending}
-        pendingLabel="Signing in…"
-        onClick={() => void signInWithGoogleOAuth()}
-      >
-        Sign in with Google
-      </GoogleSignInButton>
+      <div className="hidden lg:flex lg:items-center">
+        <GoogleSignInButton
+          variant="compact"
+          pending={oauthPending}
+          pendingLabel="Signing in…"
+          onClick={() => {
+            if (!hasSupabase) return;
+            void signInWithGoogleOAuth();
+          }}
+        >
+          Sign in with Google
+        </GoogleSignInButton>
+      </div>
     </div>
   );
 }
