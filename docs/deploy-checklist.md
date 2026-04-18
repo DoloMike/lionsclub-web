@@ -1,158 +1,184 @@
-# Production Deployment Checklist — lionsclub-web
+# Production Deployment TODO — lewisportlions.club
 
-**Last updated:** April 2026  
-**Status:** ❌ Blocked — several prerequisites unmet before first deploy
-
----
-
-## What we've learned so far
-
-### This server (the production host)
-
-- **Tailscale IP:** `100.92.149.45`
-- **Nginx:** BROKEN — `systemctl status nginx` shows failed unit. Trying to load SSL cert
-  `/etc/letsencrypt/live/staging.deploys.internetmusicindex.com/fullchain.pem` which **does not exist**
-  (directory is empty/missing). This blocks nginx restart.
-- **Coolify:** Running at `100.92.149.45:8889` — only 1 app deployed: `internetmusicindex-staging`
-  (Coolify UUID: `wijikcto6ef435pmxuqzb0ou`, fqdn: `http://wijikcto6ef435pmxuqzb0ou.178.156.249.242.sslip.io`)
-- **Supabase (internetmusicindex):** Running as Docker containers, ports 54321–54327
-  (54321 = Kong/api, 54322 = db, 54323 = Studio, 54324 = SMTP, 54325 = IMAP, 54326 = POP3, 54327 = analytics)
-- **Coolify DB:** Separate Postgres at port 5432 (not the same as Supabase db)
-
-### CI/CD pipeline
-
-**`.github/workflows/ci.yml`** — runs on every push to main and on PRs:
-`bun install → bun run lint → bun run test → bun run build → bun run type-check`
-All env vars are placeholders (ci-placeholder). CI has been failing — **actual failure output not yet retrieved.**
-
-**`.github/workflows/deploy.yml`** — runs on push to main, after CI passes:
-1. Connects via Tailscale
-2. Cancels any in-progress Coolify deployments + waits for idle
-3. Triggers Coolify deploy via `POST /api/v1/deploy?uuid=${APP_UUID}&force=false`
-4. Polls deployment status until finished/failed/error
-
-**Required GitHub Secrets (not yet set):**
-- `COOLIFY_HOST` — Coolify host URL
-- `COOLIFY_APPLICATION_UUID` — the lionsclub-web application UUID in Coolify
-- `COOLIFY_TOKEN` — Coolify API token
-- `TAILSCALE_OAUTH_CLIENT_ID` — Tailscale OAuth client ID
-- `TAILSCALE_OAUTH_CLIENT_SECRET` — Tailscale OAuth client secret
+**Last updated:** April 18, 2026
+**CI Status:** ✅ GREEN (next-themes + bun.lock fixed)
+**Deploy Status:** ❌ BLOCKED — multiple prerequisites unmet
 
 ---
 
-## Deployment blockers (in order)
+## Current Status
 
-### 1. ❌ Fix nginx (server-wide, affects everything)
-
-**Problem:** nginx won't start because it can't load
-`/etc/letsencrypt/live/staging.deploys.internetmusicindex.com/fullchain.pem` (file missing).
-
-**Why it matters:** nginx fronts both Coolify (port 8443/8080) and the internetmusicindex staging site.
-Can't restart services until nginx is fixed.
-
-**Fix:** Check what's actually in `/etc/letsencrypt/archive/` and either restore the cert or
-remove the broken `server` block from `/etc/nginx/sites-enabled/coolify` (the ssl cert directives
-in that file reference a cert that doesn't exist). Then `nginx -t && systemctl restart nginx`.
+| Item | Status |
+|------|--------|
+| CI (lint → test → build → type-check) | ✅ Passing |
+| Deploy to Coolify | ❌ Tailscale OAuth secrets missing |
+| Supabase for lionsclub-web | ❌ Not created |
+| Coolify app for lionsclub-web | ❌ Not created |
+| nginx / SSL for lionsclub.club | ❌ Not configured |
+| GitHub Actions secrets | ❌ 4 of 5 missing |
 
 ---
 
-### 2. ❌ Create a new Supabase instance for lionsclub-web
+## TODO (in order)
 
-**Problem:** The existing Supabase is for `internetmusicindex`. lionsclub-web needs its own
-Supabase project to avoid schema conflicts and keep its data isolated.
+### 1. 🔲 Set GitHub Actions secrets
 
-**What we know:**
-- Supabase runs as Docker containers; each "project" is a separate set of containers
-- The existing Supabase uses ports 54321–54327. A new instance needs **different mapped host ports**
-- Supabase's Docker compose defines: db, kong, auth, storage, rest, realtime, pg_meta, studio, inbucket, analytics, vector
+The `deploy.yml` workflow requires these secrets in the repo:
+
+| Secret | Where to get it |
+|--------|-----------------|
+| `COOLIFY_HOST` | `https://staging.deploys.internetmusicindex.com` or `http://100.92.149.45:8889` |
+| `COOLIFY_APPLICATION_UUID` | Create app in Coolify first (see TODO 3) |
+| `COOLIFY_TOKEN` | Coolify dashboard → Settings → API Tokens |
+| `TAILSCALE_OAUTH_CLIENT_ID` | tailscale.com/admin/settings/oauth-clients |
+| `TAILSCALE_OAUTH_CLIENT_SECRET` | tailscale.com/admin/settings/oauth-clients |
+
+**Action:** After creating the Coolify app (TODO 3), set all 5 secrets via:
+```bash
+gh secret set COOLIFY_HOST --body "https://staging.deploys.internetmusicindex.com"
+gh secret set COOLIFY_APPLICATION_UUID --body "<UUID from Coolify>"
+gh secret set COOLIFY_TOKEN --body "<token from Coolify>"
+gh secret set TAILSCALE_OAUTH_CLIENT_ID --body "<from Tailscale admin>"
+gh secret set TAILSCALE_OAUTH_CLIENT_SECRET --body "<from Tailscale admin>"
+```
+
+---
+
+### 2. 🔲 Fix broken nginx on server
+
+**Problem:** nginx is failed because it references a missing SSL cert:
+`/etc/letsencrypt/live/staging.deploys.internetmusicindex.com/fullchain.pem`
+
+**Impact:** Blocks nginx restart, which affects Coolify proxy and the existing internetmusicindex site.
+
+**Fix (on server):**
+```bash
+# Check what's in the coolify nginx site config
+cat /etc/nginx/sites-enabled/coolify
+
+# Either restore the cert or remove the broken ssl_certificate directives
+# Then test and restart:
+nginx -t && systemctl restart nginx
+```
+
+⚠️ **Important:** Whatever fix is applied must not break the existing `internetmusicindex` routing.
+
+---
+
+### 3. 🔲 Create new Supabase instance for lionsclub-web
+
+**Goal:** Isolated Supabase project for lionsclub-web, running as Docker containers on the same server.
+
+**Existing Supabase (internetmusicindex) ports:** 54321–54327
+**New instance should use:** ports 54330–54340 (avoids conflict)
+
+**Steps:**
+```bash
+# Create new docker-compose.yml for lionsclub Supabase in ~/dev/lionsclub-web/supabase/
+# or a separate location on the server
+
+# Key config changes vs existing Supabase:
+# - db port: 54322 → 54332
+# - kong port: 54321 → 54331
+# - studio port: 54323 → 54333
+# - analytics port: 54327 → 54337
+# - Use different POSTGRES_PASSWORD
+
+# Start with restart: always so it survives reboots
+docker compose up -d
+```
+
+**After instance is up, collect these values for GitHub Actions / Coolify env vars:**
+- `NEXT_PUBLIC_SUPABASE_URL` = the new Kong URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+**Then run migrations:**
+```bash
+supabase db push  # or apply migrations from supabase/migrations/
+```
+
+---
+
+### 4. 🔲 Create lionsclub-web app in Coolify
+
+**Goal:** Add the app so Coolify can receive deploy triggers from GitHub Actions.
+
+**Steps:**
+1. Go to Coolify dashboard (`http://100.92.149.45:8889`)
+2. Add new application: `lionsclub-web`
+3. Git source: `https://github.com/DoloMike/lionsclub-web`
+4. Branch: `main`
+5. Build pack: Docker (repo has `docker/Dockerfile`)
+6. Environment variables — copy from `.env.example`, fill in production values:
+   - `NEXT_PUBLIC_SUPABASE_URL` = new lionsclub Supabase URL (from TODO 3)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = from TODO 3
+   - `SUPABASE_SERVICE_ROLE_KEY` = from TODO 3
+   - `NEXT_PUBLIC_APP_URL` = `https://lewisportlions.club` (or chosen domain)
+   - `NEXT_PUBLIC_SITE_TIMEZONE` = `America/Kentucky/Louisville`
+   - `NEXT_PUBLIC_NOINDEX` = `false` (production)
+   - `STRIPE_SECRET_KEY` = `sk_live_...` (if live Stripe account exists)
+   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` = production Google OAuth client
+7. Expose port: container port 3000
+
+**After creation:** Copy the app's UUID and set it as `COOLIFY_APPLICATION_UUID` secret (TODO 1).
+
+---
+
+### 5. 🔲 nginx — add lionsclub.club site / SSL cert
+
+**Goal:** Route `lewisportlions.club` traffic to the Coolify-deployed container without conflicting with existing nginx config.
 
 **Options:**
-- **Option A:** Add a second Supabase instance via Docker Compose (recommended if server resources allow)
-  - Use different port range (e.g., 54330–54340)
-  - Needs new `docker-compose.yml` or add to existing
-- **Option B:** Use Supabase hosted (cloud) — create a project at supabase.com and use that
-  - Simpler ops, but data lives off-server
+- **Option A (recommended):** Let Coolify handle routing via its built-in proxy — set `NEXT_PUBLIC_APP_URL` correctly and configure Coolify's public domain.
+- **Option B:** Add nginx `server` block for `lewisportlions.club` pointing to the Coolify container port.
 
-**Task:** Determine which option; configure new Supabase; run migrations from `supabase/migrations/`
+**For SSL (Option B or if Coolify uses nginx):**
+```bash
+# Using Cloudflare DNS challenge (same as existing certs):
+certbot --nginx -d lewisportlions.club --dns-cloudflare
+```
 
----
-
-### 3. ❌ Add lionsclub-web app to Coolify
-
-**Problem:** Coolify only has the `internetmusicindex-staging` app. No app exists for lionsclub-web.
-
-**Task:** In Coolify UI (`https://staging.deploys.internetmusicindex.com` or directly at Coolify), add:
-- New application: `lionsclub-web`
-- Git source: `https://github.com/DoloMike/lionsclub-web`
-- Branch: `main`
-- Build pack: Docker (or custom Dockerfile — repo has `docker/Dockerfile`)
-- Environment variables (from `.env.example` + production values)
-- Port: Next.js default 3000, exposed as container port
-
-**After creation:** Set GitHub Actions secret `COOLIFY_APPLICATION_UUID` to the new app's UUID.
+**Verify no conflicts** with existing nginx config for `internetmusicindex` before restarting.
 
 ---
 
-### 4. ❌ Set GitHub Actions secrets
+### 6. 🔲 Env vars for production
 
-**Problem:** The `deploy.yml` workflow requires 5 secrets that don't exist in the repo.
+From `.env.example`, these still need production values:
 
-**Tasks:**
-- `COOLIFY_HOST` — `https://staging.deploys.internetmusicindex.com` or internal `http://100.92.149.45:8889`
-- `COOLIFY_APPLICATION_UUID` — UUID from step 3
-- `COOLIFY_TOKEN` — Coolify API token (check Coolify instance settings UI)
-- `TAILSCALE_OAUTH_CLIENT_ID` — from Tailscale admin console
-- `TAILSCALE_OAUTH_CLIENT_SECRET` — from Tailscale admin console
-
----
-
-### 5. ❌ Nginx — add lionsclub-web site (prevent conflict)
-
-**Problem:** Need to ensure the lionsclub-web app is reachable via nginx (or Coolify's built-in proxy)
-without conflicting with the existing `internetmusicindex` nginx config.
-
-**Tasks:**
-- If Coolify handles routing automatically (via its internal nginx/proxy): just configure the right
-  `NEXT_PUBLIC_APP_URL` env var and verify routing
-- If a separate nginx `server` block is needed: add one for the lionsclub domain/subdomain
-  pointing to the Coolify-assigned container port
-- **Important:** The existing nginx config for `staging.internetmusicindex.com` proxies to
-  `127.0.0.1:3001`. Ensure lionsclub-web gets a different port
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_APP_URL` | `https://lewisportlions.club` (confirm domain) |
+| `NEXT_PUBLIC_SUPABASE_URL` | From TODO 3 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From TODO 3 |
+| `SUPABASE_SERVICE_ROLE_KEY` | From TODO 3 |
+| `STRIPE_SECRET_KEY` | Live Stripe key (`sk_live_…`) |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Production Google OAuth client |
+| `NEXT_PUBLIC_NOINDEX` | `false` |
+| `NEXT_PUBLIC_SITE_TIMEZONE` | `America/Kentucky/Louisville` |
 
 ---
 
-### 6. ❌ Get CI green first
+## Open Questions
 
-**Problem:** CI (lint + test + build + type-check) is failing. Need to know the actual error.
-
-**Task:** Get CI failure output from GitHub Actions UI or via API, then fix whatever is breaking.
-Likely culprits: missing env vars, lint errors, failing tests, or TypeScript errors.
-
----
-
-### 7. ❌ Env vars for production
-
-**Problem:** `.env.example` has many vars. Need production values for:
-- `NEXT_PUBLIC_APP_URL` — canonical production URL
-- `NEXT_PUBLIC_SUPABASE_URL` — new lionsclub Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — new Supabase anon key
-- `SUPABASE_SERVICE_ROLE_KEY` — new Supabase service role key
-- `STRIPE_SECRET_KEY` — `sk_live_…` (Stripe live key)
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` — production Google OAuth client
-- `NEXT_PUBLIC_NOINDEX=false` — production flag
-- `NEXT_PUBLIC_SITE_TIMEZONE` — `America/Kentucky/Louisville` (Lewisport, KY)
+1. **Domain:** Is `lewisportlions.club` the production URL, or a subdomain of `internetmusicindex.com`?
+2. **Stripe:** Live keys or test keys for now?
+3. **nginx fix:** Should the broken coolify SSL config be removed or restored?
+4. **Supabase migrations:** Are there existing migration files in `supabase/migrations/` to apply?
 
 ---
 
-## Auto-deploy on push to main
+## Server Info
 
-Once all blockers above are resolved:
-- Push to `main` → CI runs (lint/test/build/type-check) → if green, deploy.yml triggers → Coolify deploys
-- No manual steps needed after first setup
+**Tailscale IP:** `100.92.149.45`
+**Coolify:** `100.92.149.45:8889`
+**Existing Supabase (imi):** ports 54321–54327
+**New Supabase target ports:** 54330–54340
 
 ---
 
-## Current server port map (occupied)
+## Port Map (occupied + planned)
 
 | Port | Service |
 |------|---------|
@@ -161,24 +187,12 @@ Once all blockers above are resolved:
 | 54321 | Supabase (imi) API/Kong |
 | 54322 | Supabase (imi) DB |
 | 54323 | Supabase (imi) Studio |
-| 54324 | Supabase (imi) SMTP |
-| 54325 | Supabase (imi) IMAP |
-| 54326 | Supabase (imi) POP3 |
-| 54327 | Supabase (imi) Analytics |
-| 8000 | ? (check `ss -tlnp`) |
+| 54324–54327 | Supabase (imi) SMTP/IMAP/POP3/Analytics |
+| 54331 | **NEW** Supabase (lions) Kong |
+| 54332 | **NEW** Supabase (lions) DB |
+| 54333 | **NEW** Supabase (lions) Studio |
+| 54337 | **NEW** Supabase (lions) Analytics |
 | 8080 | Coolify HTTP |
 | 8443 | Coolify HTTPS |
 | 8889 | Coolify (main) |
-| 9000 | Coolify? |
-| 3001 | internetmusicindex-staging (container port → host 3001) |
-| 100.92.149.45:6001-6002 | Coolify realtime |
-
----
-
-## Questions / decisions needed
-
-1. **Supabase approach:** Docker-hosted on this server (new port range) or Supabase Cloud?
-2. **Domain / subdomain:** What URL should lionsclub-web be accessible at? (e.g. `lionsclub.internetmusicindex.com` or a separate domain?)
-3. **nginx fix first:** Who should handle the broken nginx SSL cert — just remove the broken coolify site config, or do you want to preserve it?
-4. **CI failure:** Do you have the GitHub Actions run URL with the CI failure output, or should I pull it via the API?
-5. **Stripe:** Is there a live Stripe account to use, or should we start with test keys?
+| 3001 | internetmusicindex-staging |
