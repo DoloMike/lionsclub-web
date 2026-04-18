@@ -1,57 +1,28 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { env, isSupabaseConfigured } from "@/lib/env";
 
+/**
+ * OAuth callback route.
+ *
+ * After Google authenticates, Supabase redirects here with `?code=...&next=/`.
+ * The browser-side Supabase client (createBrowserClient, which uses
+ * detectSessionInUrl: true by default) picks up the auth code from the URL
+ * and exchanges it for a session automatically. This mirrors the pattern
+ * used in the IMI codebase.
+ */
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const appOrigin = process.env.NEXT_PUBLIC_APP_URL
-    ? new URL(process.env.NEXT_PUBLIC_APP_URL).origin
-    : url.origin;
-
-  if (!isSupabaseConfigured()) {
-    return NextResponse.redirect(new URL("/", appOrigin));
-  }
-
-  const code = url.searchParams.get("code");
-  const nextRaw = url.searchParams.get("next") ?? "/";
+  const requestUrl = new URL(request.url);
+  const next = requestUrl.searchParams.get("next") ?? "/";
   const safeNext =
-    nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
+    next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
-  if (code) {
-    const cookieStore = await cookies();
-    const appHostname = new URL(appOrigin).hostname;
-    const supabase = createServerClient(
-      env.supabase.url,
-      env.supabase.anonKey,
-      {
-        cookieOptions: {
-          path: "/",
-          sameSite: "lax",
-          secure: !env.isDevelopment,
-          domain: appHostname === "localhost" ? undefined : appHostname,
-        },
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
+  // Use x-forwarded-host to get the public-facing origin.
+  // Inside Coolify, request.url uses the internal host (localhost:3000),
+  // but nginx sets x-forwarded-host to the real public hostname.
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") ?? "https";
+  const origin = forwardedHost
+    ? `${forwardedProto}://${forwardedHost}`
+    : requestUrl.origin;
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      const login = new URL("/login", appOrigin);
-      login.searchParams.set("error", "oauth");
-      login.searchParams.set("message", error.message);
-      return NextResponse.redirect(login);
-    }
-  }
-
-  return NextResponse.redirect(new URL(safeNext, appOrigin));
+  return NextResponse.redirect(`${origin}${safeNext}`);
 }
