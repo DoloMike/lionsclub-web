@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: "Fundraising",
   description:
     "Chicken cook and other fundraisers—ordering, pickup, and payment information.",
+  alternates: { canonical: "/fundraising" },
 };
 
 function formatDate(ymd: string | null): string | null {

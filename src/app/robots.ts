@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getPublicSiteUrl } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
   if (process.env.NODE_ENV !== "production") {
@@ -13,10 +14,7 @@ export default function robots(): MetadataRoute.Robots {
     };
   }
 
-  const base = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
-    /\/$/,
-    ""
-  );
+  const base = getPublicSiteUrl();
 
   return {
     rules: { userAgent: "*", allow: "/" },

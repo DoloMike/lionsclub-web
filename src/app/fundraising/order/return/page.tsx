@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container } from "@/components/Container";
@@ -5,6 +6,13 @@ import { isStripeConfigured } from "@/lib/env";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { site } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Order confirmation",
+  description:
+    "Confirmation after your Lewisport Lions Club fundraiser order.",
+  robots: { index: false, follow: false },
+};
 
 type Props = {
   searchParams: Promise<{ session_id?: string }>;

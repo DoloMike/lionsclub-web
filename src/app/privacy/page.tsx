@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Privacy",
   description: "Privacy practices for the Lewisport Lions Club website.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

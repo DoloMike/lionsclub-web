@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Order chicken",
   description:
     "Place a chicken cook order and pay online. Pickup details are shown before checkout.",
+  alternates: { canonical: "/fundraising/order" },
 };
 
 type Props = {

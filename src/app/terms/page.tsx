@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Terms",
   description: "Terms of use for the Lewisport Lions Club website.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

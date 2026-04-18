@@ -262,8 +262,9 @@ export function HeaderAuthControls({
       auto_select: false,
       cancel_on_tap_outside: true,
       itp_support: true,
-      // FedCM + React Strict Mode (dev) often logs AbortError when the effect re-runs.
-      use_fedcm_for_prompt: false,
+      // Chrome (incl. Android): FedCM is the supported path for One Tap; improves odds the
+      // prompt appears. Dev keeps this off to reduce Strict Mode / FedCM AbortError noise.
+      use_fedcm_for_prompt: process.env.NODE_ENV === "production",
     });
 
     const promptTimer = window.setTimeout(() => {

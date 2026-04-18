@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Service programs",
   description:
     "Vision, hearing, youth, scholarships, and community programs in Hancock County.",
+  alternates: { canonical: "/service" },
 };
 
 export default function ServicePage() {

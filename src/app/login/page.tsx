@@ -5,6 +5,7 @@ import { LoginPanel } from "./LoginPanel";
 export const metadata: Metadata = {
   title: "Sign in",
   description: "Sign in with Google — chapter member and admin roles are assigned separately.",
+  alternates: { canonical: "/login" },
 };
 
 type Props = {

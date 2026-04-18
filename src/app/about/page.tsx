@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About",
   description: `Chapter story, district (${site.district}), and relationship to Lions Clubs International.`,
+  alternates: { canonical: "/about" },
 };
 
 export default async function AboutPage() {

@@ -7,6 +7,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact",
   description: "Reach the Lewisport Lions Club by email.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

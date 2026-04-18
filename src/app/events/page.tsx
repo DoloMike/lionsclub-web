@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Events",
   description:
     "Upcoming and recurring events—parades, screenings, and fundraisers for the Lewisport Lions.",
+  alternates: { canonical: "/events" },
 };
 
 export default async function EventsPage() {

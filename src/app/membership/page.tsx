@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Membership",
   description:
     "Why join the Lewisport Lions, what to expect at meetings, and future member sign-in.",
+  alternates: { canonical: "/membership" },
 };
 
 export default async function MembershipPage() {

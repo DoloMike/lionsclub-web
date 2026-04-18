@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getPublicSiteUrl } from "@/lib/site-url";
 
 const paths = [
   "",
@@ -6,6 +7,7 @@ const paths = [
   "/service",
   "/events",
   "/fundraising",
+  "/fundraising/order",
   "/membership",
   "/login",
   "/contact",
@@ -14,9 +16,7 @@ const paths = [
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = (
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ).replace(/\/$/, "");
+  const base = getPublicSiteUrl();
 
   const now = new Date();
 

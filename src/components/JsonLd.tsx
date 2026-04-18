@@ -1,3 +1,4 @@
+import { getPublicSiteUrl } from "@/lib/site-url";
 import { defaultDescription, site } from "@/lib/site";
 
 /** Local SEO: NAP-style structured data (Name, Address, Phone — phone omitted if none). */
@@ -7,7 +8,7 @@ export function OrganizationJsonLd() {
     "@type": "NGO",
     name: site.name,
     description: defaultDescription,
-    url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    url: getPublicSiteUrl(),
     address: {
       "@type": "PostalAddress",
       streetAddress: `${site.address.venue}, ${site.address.street}`,
@@ -20,6 +21,10 @@ export function OrganizationJsonLd() {
     ...(site.contact.phone
       ? { telephone: site.contact.phone }
       : {}),
+    areaServed: {
+      "@type": "AdministrativeArea",
+      name: "Hancock County, Kentucky",
+    },
   };
 
   return (

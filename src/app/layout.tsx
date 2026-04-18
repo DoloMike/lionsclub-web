@@ -10,7 +10,11 @@ import { getSessionProfile } from "@/lib/auth/get-session";
 import { OrganizationJsonLd } from "@/components/JsonLd";
 import { getMeetingSchedule, getSocialLinks } from "@/lib/data/chapter-content";
 import { getFundraiserBannerSegments } from "@/lib/data/fundraiser-banner";
+import { LCI_LOGO_DARK_SRC } from "@/lib/brand";
+import { getPublicSiteUrl } from "@/lib/site-url";
 import { defaultDescription, site } from "@/lib/site";
+
+const siteUrl = getPublicSiteUrl();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,9 +34,25 @@ export const metadata: Metadata = {
     template: `%s | ${site.shortName}`,
   },
   description: defaultDescription,
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ),
+  metadataBase: new URL(siteUrl),
+  icons: {
+    icon: [{ url: LCI_LOGO_DARK_SRC, type: "image/svg+xml", sizes: "any" }],
+    shortcut: LCI_LOGO_DARK_SRC,
+    apple: LCI_LOGO_DARK_SRC,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: site.shortName,
+    title: site.name,
+    description: defaultDescription,
+    url: siteUrl,
+  },
+  twitter: {
+    card: "summary",
+    title: site.name,
+    description: defaultDescription,
+  },
 };
 
 export default async function RootLayout({
