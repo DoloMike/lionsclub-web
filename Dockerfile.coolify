@@ -4,6 +4,8 @@
 FROM oven/bun:1.2-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
+# Skip Husky (prepare script) in the image — no .git, hooks not needed.
+ENV HUSKY=0
 RUN bun install --frozen-lockfile
 
 # ---- Builder ----

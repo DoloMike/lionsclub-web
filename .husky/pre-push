@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+set -e
+
+# Last line of defense before Coolify: same check as Docker (frozen lockfile).
+bun run check:lockfile

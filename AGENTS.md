@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Stack notes
 
-- **Dependencies:** Use **Bun** only (`bun install`, `bun add`). This repo’s lockfile is **`bun.lock`** (`package-lock.json` is gitignored). Any change to **`package.json`** must include an updated **`bun.lock`** (run `bun install` and commit). Docker/Coolify and CI run **`bun install --frozen-lockfile`** and will fail if they drift. Before pushing dep changes, run **`bun run check:lockfile`** locally.
+- **Dependencies:** Use **Bun** only (`bun install`, `bun add`). This repo’s lockfile is **`bun.lock`** (`package-lock.json` is gitignored). Any change to **`package.json`** must include an updated **`bun.lock`**. **Husky** runs on commit: if you stage **`package.json`**, **`bun install`** runs and **`bun.lock` is re-staged** when it changes. **`pre-push`** runs **`bun run check:lockfile`** (same as Docker’s frozen install). After clone, run **`bun install`** once so `prepare` installs hooks. CI/Docker set **`HUSKY=0`** so installs don’t try to configure git in sandboxes.
 - Shared UI lives under `src/components/` (not under `src/app/`).
 - Supabase: `@/lib/supabase/browser` (anon, client-safe) vs `@/lib/supabase/admin` (service role, `server-only`), `server-client` (cookie session), `public-server` (anon reads without a user).
 - Env access goes through `src/lib/env.ts` so keys stay consistent.

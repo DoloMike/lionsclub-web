@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+set -e
+
+# If package.json is part of this commit, refresh the lockfile so bun.lock never lags behind.
+if git diff --cached --name-only | grep -q '^package\.json$'; then
+  bun install
+  if git status --porcelain bun.lock | grep -q .; then
+    git add bun.lock
+    echo "husky: bun.lock was updated and staged for this commit."
+  fi
+fi
