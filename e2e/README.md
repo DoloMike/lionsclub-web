@@ -33,18 +33,28 @@ account.
 ## Running
 
 ```bash
-# Start the dev server in one terminal (or let Playwright start it for you)
-bun run dev:http
+# Start any dev server (or let Playwright start one for you):
+bun run dev          # https://localhost:3000 (the default)
+# or
+bun run dev:http     # http://localhost:3000
 
 # Then, in another terminal:
-bun run e2e            # headless
-bun run e2e:headed     # watch the browser drive it
-bun run e2e:ui         # Playwright's interactive UI mode
+bun run e2e          # headless
+bun run e2e:headed   # watch the browser drive it
+bun run e2e:ui       # Playwright's interactive UI mode
 ```
 
-The Playwright config has `reuseExistingServer: true`, so if you already
-have `bun run dev:http` running on `:3000` it'll be reused; otherwise
-Playwright will start it.
+The Playwright config probes both `https://localhost:3000` and
+`http://localhost:3000` and uses whichever responds, so you don't have
+to remember which dev mode you started. `reuseExistingServer: true`
+means an already-running server is reused; otherwise Playwright starts
+`bun run dev:http` itself.
+
+Override the base URL when needed:
+
+```bash
+E2E_BASE_URL=http://localhost:3001 bun run e2e
+```
 
 > Use `bun run e2e` (which delegates to the `playwright` shim in
 > `node_modules/.bin/`, run by Node). Avoid `bunx playwright test` directly

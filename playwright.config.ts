@@ -7,20 +7,67 @@
  *     and lint stay green in CI without installing browsers.
  *
  * Run locally with:
- *   bun run e2e            # headless, against http://localhost:3000
+ *   bun run e2e            # headless, auto-detects http vs https on :3000
  *   bun run e2e:ui         # Playwright UI mode
  *   bun run e2e:headed     # Headed Chromium so you can watch it click
  *
  * Requirements before first run:
  *   1. `bunx playwright install chromium`
- *   2. A Stripe TEST-mode `STRIPE_SECRET_KEY` in `.env.local` (and either
- *      `NEXT_PUBLIC_APP_URL=http://localhost:3000` or just rely on origin).
+ *   2. A Stripe TEST-mode `STRIPE_SECRET_KEY` in `.env.local`.
  *   3. At least one open fundraiser event in the local Supabase DB.
  *   4. A dev server running (or let Playwright start one — see `webServer`).
+ *      Either `bun run dev` (https) or `bun run dev:http` works; the
+ *      `detectBaseUrl()` helper below picks the right protocol.
+ *      Override with `E2E_BASE_URL=...` if needed.
  */
+import { spawnSync } from "node:child_process";
 import { defineConfig, devices } from "@playwright/test";
 
-const BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
+/**
+ * Pick the right base URL for whatever dev server is already running.
+ *
+ * The repo's default `bun run dev` uses `next --experimental-https`, so the
+ * common local setup is https://localhost:3000 with a self-signed cert.
+ * Probing that URL with a vanilla fetch fails the TLS handshake, which made
+ * Playwright (a) think no server was up and (b) try to start its own
+ * `bun run dev:http`, which then collides on port 3000 and aborts the run.
+ *
+ * We probe https first, then http, with a tiny Node subprocess that does a
+ * 2s HEAD request and ignores cert errors. If neither responds we fall back
+ * to http://localhost:3000 so Playwright's `webServer` can start one.
+ */
+function probeUrl(url: string): boolean {
+  const result = spawnSync(
+    process.execPath,
+    [
+      "-e",
+      `const u = new URL(${JSON.stringify(url)});
+       const lib = require(u.protocol === 'https:' ? 'https' : 'http');
+       const req = lib.request({
+         method: 'HEAD',
+         hostname: u.hostname,
+         port: u.port,
+         path: '/',
+         timeout: 2000,
+         rejectUnauthorized: false,
+       }, () => process.exit(0));
+       req.on('error', () => process.exit(1));
+       req.on('timeout', () => process.exit(1));
+       req.end();`,
+    ],
+    { stdio: "ignore", timeout: 5_000 },
+  );
+  return result.status === 0;
+}
+
+function detectBaseUrl(): string {
+  if (process.env.E2E_BASE_URL) return process.env.E2E_BASE_URL;
+  if (probeUrl("https://localhost:3000/")) return "https://localhost:3000";
+  if (probeUrl("http://localhost:3000/")) return "http://localhost:3000";
+  return "http://localhost:3000";
+}
+
+const BASE_URL = detectBaseUrl();
 
 export default defineConfig({
   testDir: "./e2e",
