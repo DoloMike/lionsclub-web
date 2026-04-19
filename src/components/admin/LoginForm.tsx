@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  signOut,
-} from "@/app/admin/(protected)/actions";
+import { signOut } from "@/app/admin/(protected)/actions";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function LoginForm({
@@ -18,8 +17,9 @@ export function LoginForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [oauthPending, setOauthPending] = useState(false);
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
+  const { pending: oauthPending, signIn: signInWithGoogleOAuth } =
+    useGoogleOAuthSignIn();
 
   const banner =
     errorParam === "forbidden"
@@ -53,22 +53,6 @@ export function LoginForm({
     router.refresh();
   }
 
-  async function signInWithGoogle() {
-    setError(null);
-    setOauthPending(true);
-    const origin = window.location.origin;
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${origin}/auth/callback?next=/admin`,
-      },
-    });
-    setOauthPending(false);
-    if (oauthError) {
-      setError(oauthError.message);
-    }
-  }
-
   return (
     <div className="mx-auto mt-8 w-full max-w-sm space-y-4">
       {banner ? (
@@ -89,7 +73,10 @@ export function LoginForm({
           className="mt-6"
           pending={oauthPending}
           disabled={pending}
-          onClick={() => void signInWithGoogle()}
+          onClick={() => {
+            setError(null);
+            void signInWithGoogleOAuth("/admin");
+          }}
         />
         <p className="my-4 text-center text-xs text-muted-foreground">or</p>
         <form onSubmit={handleSubmit} className="space-y-4">

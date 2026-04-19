@@ -11,16 +11,17 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 export function useGoogleOAuthSignIn() {
   const [pending, setPending] = useState(false);
 
-  const signIn = useCallback(async () => {
+  const signIn = useCallback(async (nextPath?: string) => {
     if (!env.supabase.url || !env.supabase.anonKey) return;
     const supabase = createBrowserSupabaseClient();
     const origin = window.location.origin;
+    const next = nextPath ?? `${window.location.pathname}${window.location.search}`;
     setPending(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       });
       if (error) console.error(error);
