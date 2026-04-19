@@ -165,6 +165,14 @@ export async function POST(request: Request) {
         },
       ],
       customer_email: customerEmail,
+      // Belt-and-suspenders alongside the Stripe Dashboard "Successful payments"
+      // toggle: setting receipt_email on the underlying PaymentIntent makes the
+      // receipt request explicit per-session, so a buyer still gets emailed even
+      // if the account-level toggle is ever flipped off or a different account
+      // is wired up later.
+      payment_intent_data: {
+        receipt_email: customerEmail,
+      },
       metadata: {
         event_id: event.id,
         quantity: String(quantity),
