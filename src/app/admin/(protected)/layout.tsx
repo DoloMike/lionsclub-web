@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { AdminNavLinks } from "@/components/admin/AdminNavLinks";
 import { AdminSavedBanner } from "@/components/admin/AdminSavedBanner";
+import { AdminSignOutButton } from "@/components/admin/AdminSignOutButton";
 import { MissingSupabaseConfig } from "@/components/admin/MissingSupabaseConfig";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { getSessionAdmin } from "@/lib/auth/get-session";
 import { isSupabaseConfigured } from "@/lib/env";
-import { signOut } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -40,14 +40,7 @@ export default async function AdminProtectedLayout({
             >
               View site
             </Link>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition hover:bg-muted"
-              >
-                Sign out
-              </button>
-            </form>
+            <AdminSignOutButton />
           </div>
         </div>
       </header>
