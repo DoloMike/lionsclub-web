@@ -24,4 +24,14 @@ describe("getCachedProfileRole", () => {
     maybeSingle.mockResolvedValueOnce({ data: null });
     await expect(getCachedProfileRole("u2")).resolves.toBe("guest");
   });
+
+  it("throws on Supabase error so unstable_cache does not memoize a fallback", async () => {
+    maybeSingle.mockResolvedValueOnce({
+      data: null,
+      error: { message: "connection reset" },
+    });
+    await expect(getCachedProfileRole("u3")).rejects.toThrow(
+      /connection reset/
+    );
+  });
 });

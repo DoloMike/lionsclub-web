@@ -12,17 +12,31 @@ const PROFILE_ROLE_TAG = "profile-role";
  * `unstable_cache` covers across-request dedupe so the row isn't re-read on
  * every signed-in page view.
  *
+ * Failure semantics: a Supabase `error` (network blip, timeout, etc.) THROWS
+ * so `unstable_cache` does not memoize a fallback. A successful query that
+ * returns no row resolves to `"guest"` and IS cached (that's the legitimate
+ * "user has no profile" state). The caller decides how to render a thrown
+ * failure for the request — see `getSessionProfile`.
+ *
  * Invalidate with `updateTag(\`profile-role:${userId}\`)` when an admin
  * changes a user's role.
  */
 export async function getCachedProfileRole(userId: string): Promise<string> {
   return unstable_cache(
     async (): Promise<string> => {
-      const { data } = await getSupabaseAdmin()
+      const { data, error } = await getSupabaseAdmin()
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .maybeSingle();
+
+      if (error) {
+        // Surface the failure so it isn't memoized as "guest" for 5 minutes.
+        throw new Error(
+          `getCachedProfileRole(${userId}) failed: ${error.message}`
+        );
+      }
+
       return data?.role ?? "guest";
     },
     [PROFILE_ROLE_TAG, userId],

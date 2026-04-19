@@ -68,6 +68,21 @@ describe("get-session", () => {
     expect(getCachedProfileRole).toHaveBeenCalledWith("u1");
   });
 
+  it("getSessionProfile degrades to guest for the request when role lookup throws", async () => {
+    getUser.mockResolvedValueOnce({
+      data: { user: { id: "u-throws", email: "x@y.co" } },
+    });
+    getCachedProfileRole.mockRejectedValueOnce(new Error("supabase down"));
+    const consoleErr = vi.spyOn(console, "error").mockImplementation(() => {});
+    const s = await getSessionProfile();
+    expect(s).toEqual({
+      user: { id: "u-throws", email: "x@y.co" },
+      role: "guest",
+    });
+    expect(consoleErr).toHaveBeenCalled();
+    consoleErr.mockRestore();
+  });
+
   it("getSessionUser returns null when no user", async () => {
     getUser.mockResolvedValueOnce({ data: { user: null } });
     await expect(getSessionUser()).resolves.toBeNull();

@@ -23,11 +23,17 @@ async function profileForUser(
   supabase: SupabaseClient,
   user: User
 ): Promise<SessionProfile> {
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
+
+  // Surface real errors (RLS, network, timeout) so the caller can preserve
+  // the prior known role instead of silently downgrading the user to guest.
+  // A successful query that returns no row IS a guest — that's not an error.
+  if (error) throw error;
+
   return { user, role: profile?.role ?? "guest" };
 }
 
@@ -72,8 +78,22 @@ export function SessionProfileProvider({
         try {
           const session = await profileForUser(supabase, user);
           setState({ status: "ready", session });
-        } catch {
-          setState({ status: "ready", session: { user, role: "guest" } });
+        } catch (err) {
+          // Don't downgrade to "guest" on a transient role lookup failure —
+          // that's how an admin briefly saw themselves as a guest after
+          // clicking around. Preserve the prior known role; if there is no
+          // prior session yet, swallow the update so the SSR-seeded state
+          // stays intact.
+          console.error("SessionProfileProvider: role refresh failed", err);
+          setState((prev) => {
+            if (prev.session) {
+              return {
+                status: "ready",
+                session: { user, role: prev.session.role },
+              };
+            }
+            return prev;
+          });
         }
       };
 

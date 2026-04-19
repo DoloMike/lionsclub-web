@@ -33,7 +33,16 @@ export const getSessionProfile = cache(async (): Promise<SessionProfile | null> 
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const role = await getCachedProfileRole(user.id);
+  // `getCachedProfileRole` throws on Supabase error so failures aren't
+  // memoized as "guest" for 5 minutes (see profile.ts). Catch here so a
+  // transient blip degrades to guest for THIS request only — without
+  // crashing the layout — and the next request retries.
+  let role = "guest";
+  try {
+    role = await getCachedProfileRole(user.id);
+  } catch (err) {
+    console.error("getSessionProfile: profile role lookup failed", err);
+  }
   return { user, role };
 });
 
