@@ -6,13 +6,13 @@ import { site } from "@/lib/site";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-[inset_0_2px_0_0_rgba(235,183,0,0.28)] backdrop-blur supports-[backdrop-filter]:bg-background/80 dark:shadow-none">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-[inset_0_2px_0_0_rgba(235,183,0,0.28),0_1px_0_0_rgba(15,23,42,0.04)] backdrop-blur supports-[backdrop-filter]:bg-background/80 dark:shadow-[inset_0_2px_0_0_rgba(235,183,0,0.18)]">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8">
         <HeaderBrandLink
           className="flex min-w-0 items-center gap-3 sm:gap-4"
           ariaLabel={`${site.shortName} home`}
         >
-          <span className="shrink-0 rounded-md dark:bg-white dark:px-2 dark:py-1.5 dark:shadow-sm dark:ring-1 dark:ring-white/20">
+          <span className="shrink-0 rounded-md dark:bg-white dark:px-2 dark:py-1.5 dark:shadow-[0_1px_3px_rgba(0,0,0,0.35),0_0_0_1px_rgba(0,0,0,0.04)] dark:ring-1 dark:ring-black/5">
             <LionsLogo
               priority
               className="h-8 w-auto max-w-[132px] sm:h-9 sm:max-w-[200px]"

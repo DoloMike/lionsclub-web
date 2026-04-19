@@ -3,6 +3,7 @@ import { Container } from "@/components/Container";
 import { ExternalLink } from "@/components/ExternalLink";
 import { LionsLogo } from "@/components/LionsLogo";
 import { SocialIcon, type SocialNetwork } from "@/components/SocialIcon";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import type { SocialLinkRow } from "@/lib/data/chapter-content";
 import { mainNav } from "@/lib/nav";
 import { site } from "@/lib/site";
@@ -34,15 +35,13 @@ export function Footer({
       <Container className="py-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <span className="mb-4 inline-block rounded-md dark:bg-white dark:px-2 dark:py-1.5 dark:shadow-sm dark:ring-1 dark:ring-white/20">
+            <span className="mb-4 inline-block rounded-md dark:bg-white dark:px-2 dark:py-1.5 dark:shadow-[0_1px_3px_rgba(0,0,0,0.35),0_0_0_1px_rgba(0,0,0,0.04)] dark:ring-1 dark:ring-black/5">
               <LionsLogo
                 className="h-8 w-auto max-w-[180px]"
                 alt="Lions Clubs International"
               />
             </span>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {site.name}
-            </p>
+            <Eyebrow>{site.name}</Eyebrow>
             <p className="mt-2 text-sm text-muted-foreground">{site.location}</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {site.district}

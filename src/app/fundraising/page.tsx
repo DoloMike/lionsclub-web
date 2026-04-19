@@ -3,6 +3,8 @@ import { Container } from "@/components/Container";
 import { FundraisingTrustCallout } from "@/components/fundraising/FundraisingTrustCallout";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
+import { ButtonLink } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import Link from "next/link";
 import { formatInstantInTimezone } from "@/lib/datetime";
 import type { FundraiserEventRow } from "@/lib/data/fundraiser";
@@ -171,11 +173,20 @@ export default async function FundraisingPage() {
         ) : null}
 
         {acceptingOrders.length === 0 && closedBeforePickup.length === 0 ? (
-          <p>
-            There aren&apos;t any upcoming chicken cooks listed right now. Watch
-            this page or{" "}
-            <Link href="/contact">contact the club</Link> for the next date.
-          </p>
+          <div className="not-prose mt-4">
+            <EmptyState
+              title="No chicken cooks scheduled right now"
+              description="Watch this page or the site banner for the next round — we typically run a few cooks per year."
+              actions={
+                <>
+                  <ButtonLink href="/contact">Contact the club</ButtonLink>
+                  <ButtonLink href="/membership" variant="secondary">
+                    Membership info
+                  </ButtonLink>
+                </>
+              }
+            />
+          </div>
         ) : null}
 
         <p>

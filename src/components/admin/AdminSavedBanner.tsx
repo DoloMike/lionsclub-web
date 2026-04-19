@@ -26,11 +26,25 @@ export function AdminSavedBanner() {
 
   return (
     <div
-      className="mb-6 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-foreground"
+      className="mb-6 flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3 text-sm text-foreground animate-slide-down-in"
       role="status"
     >
-      <strong className="text-primary">Saved.</strong> Changes are live on the
-      public site.
+      <svg
+        className="h-4 w-4 shrink-0 text-primary"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden
+      >
+        <path
+          fillRule="evenodd"
+          d="M16.704 5.296a1 1 0 010 1.408l-7.5 7.5a1 1 0 01-1.408 0l-3.5-3.5a1 1 0 111.408-1.408L8.5 12.092l6.796-6.796a1 1 0 011.408 0z"
+          clipRule="evenodd"
+        />
+      </svg>
+      <span>
+        <strong className="text-primary">Saved.</strong> Changes are live on the
+        public site.
+      </span>
     </div>
   );
 }

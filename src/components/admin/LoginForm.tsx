@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { signOut } from "@/app/admin/(protected)/actions";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { fieldClassName } from "@/components/ui/field";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function LoginForm({
@@ -57,13 +60,13 @@ export function LoginForm({
     <div className="mx-auto mt-8 w-full max-w-sm space-y-4">
       {banner ? (
         <div
-          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
+          className="rounded-lg border border-warning-border bg-warning-bg px-4 py-3 text-sm text-warning-foreground"
           role="status"
         >
           {banner}
         </div>
       ) : null}
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <Card padding="xl">
         <h1 className="text-xl font-semibold text-foreground">Admin sign in</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Email/password or Google (configure Google in Supabase first).
@@ -93,7 +96,7 @@ export function LoginForm({
               type="email"
               autoComplete="email"
               required
-              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              className={fieldClassName("mt-1")}
             />
           </div>
           <div>
@@ -109,31 +112,39 @@ export function LoginForm({
               type="password"
               autoComplete="current-password"
               required
-              className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+              className={fieldClassName("mt-1")}
             />
           </div>
           {error ? (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            <p
+              className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+              role="alert"
+            >
               {error}
             </p>
           ) : null}
-          <button
+          <Button
             type="submit"
-            disabled={pending || oauthPending}
-            className="w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+            size="md"
+            className="w-full"
+            disabled={oauthPending}
+            pending={pending}
+            pendingLabel="Signing in…"
           >
-            {pending ? "Signing in…" : "Sign in with email"}
-          </button>
+            Sign in with email
+          </Button>
         </form>
-      </div>
+      </Card>
       {errorParam === "forbidden" ? (
         <form action={signOut}>
-          <button
+          <Button
             type="submit"
-            className="w-full rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            variant="ghost"
+            size="md"
+            className="w-full text-muted-foreground hover:text-foreground"
           >
             Sign out
-          </button>
+          </Button>
         </form>
       ) : null}
     </div>

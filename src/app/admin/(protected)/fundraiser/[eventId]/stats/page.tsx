@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import {
   computeFundraiserAggregates,
   getChickenOrdersForEventAdmin,
@@ -43,7 +44,7 @@ export default async function FundraiserStatsPage({ params }: Props) {
 
   return (
     <div>
-      <p className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+      <Eyebrow>
         <Link
           href="/admin/fundraiser"
           className="text-primary underline-offset-4 hover:underline"
@@ -52,7 +53,7 @@ export default async function FundraiserStatsPage({ params }: Props) {
         </Link>
         <span aria-hidden> · </span>
         Stats
-      </p>
+      </Eyebrow>
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">

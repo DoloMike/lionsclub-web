@@ -24,7 +24,10 @@ export default async function ChickenOrderPage({ searchParams }: Props) {
     <>
       <PageHeader title="Order chicken" />
       {sp.canceled ? (
-        <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+        <div
+          className="border-b border-warning-border bg-warning-bg px-4 py-3 text-center text-sm text-warning-foreground"
+          role="status"
+        >
           Checkout was canceled — your order was not saved.
         </div>
       ) : null}

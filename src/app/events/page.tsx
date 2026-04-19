@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { getChapterEvents } from "@/lib/data/chapter-content";
 
 export const metadata: Metadata = {
@@ -22,28 +23,19 @@ export default async function EventsPage() {
       />
       <Prose>
         {events.length === 0 ? (
-          <div className="not-prose rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center">
-            <p className="text-base font-semibold text-foreground">
-              No upcoming events published yet
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              The chapter adds parades, screenings, meetings, and fundraisers
-              here when dates are set.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link
-                href="/contact"
-                className="inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-              >
-                Contact the club
-              </Link>
-              <Link
-                href="/membership"
-                className="inline-flex rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-card-foreground transition hover:bg-muted"
-              >
-                Membership &amp; meetings
-              </Link>
-            </div>
+          <div className="not-prose">
+            <EmptyState
+              title="No upcoming events published yet"
+              description="The chapter adds parades, screenings, meetings, and fundraisers here when dates are set."
+              actions={
+                <>
+                  <ButtonLink href="/contact">Contact the club</ButtonLink>
+                  <ButtonLink href="/membership" variant="secondary">
+                    Membership &amp; meetings
+                  </ButtonLink>
+                </>
+              }
+            />
           </div>
         ) : (
           <ul>

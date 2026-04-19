@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AdminNavLinks } from "@/components/admin/AdminNavLinks";
 import { AdminSavedBanner } from "@/components/admin/AdminSavedBanner";
 import { MissingSupabaseConfig } from "@/components/admin/MissingSupabaseConfig";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { getSessionAdmin } from "@/lib/auth/get-session";
 import { isSupabaseConfigured } from "@/lib/env";
 import { signOut } from "./actions";
@@ -28,9 +29,7 @@ export default async function AdminProtectedLayout({
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <span className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Site admin
-          </span>
+          <Eyebrow as="span">Site admin</Eyebrow>
           <nav className="flex flex-wrap gap-2">
             <AdminNavLinks />
           </nav>

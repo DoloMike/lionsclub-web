@@ -10,6 +10,7 @@ import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useSignOut } from "@/components/auth/useSignOut";
+import { Spinner } from "@/components/ui/Spinner";
 
 function readMetaString(
   meta: User["user_metadata"],
@@ -94,7 +95,7 @@ function LoggedInAccountMenu({
     <div className="relative shrink-0" ref={wrapRef}>
       <button
         type="button"
-        className="flex max-w-[min(100vw-6rem,16rem)] items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-2 shadow-sm transition hover:bg-muted sm:max-w-[20rem] sm:pr-3"
+        className="flex max-w-[min(100vw-6rem,16rem)] items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-2 shadow-sm transition-[background-color,box-shadow,transform] duration-150 hover:bg-muted hover:shadow active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:max-w-[20rem] sm:pr-3"
         aria-expanded={open}
         aria-haspopup="menu"
         aria-controls={open ? menuId : undefined}
@@ -132,7 +133,7 @@ function LoggedInAccountMenu({
           id={menuId}
           role="menu"
           aria-label="Account"
-          className="absolute right-0 z-50 mt-2 w-[min(calc(100vw-2rem),18rem)] rounded-lg border border-border bg-card py-1 shadow-lg"
+          className="absolute right-0 z-50 mt-2 w-[min(calc(100vw-2rem),18rem)] origin-top-right rounded-lg border border-border bg-card py-1 shadow-popover animate-slide-down-in"
         >
           <div className="border-b border-border px-3 py-2.5">
             <p className="text-xs font-medium text-muted-foreground">Signed in as</p>
@@ -177,14 +178,21 @@ function LoggedInAccountMenu({
             <button
               type="button"
               role="menuitem"
-              className="w-full px-3 py-2 text-left text-sm text-foreground transition hover:bg-muted disabled:opacity-50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground transition-colors duration-150 hover:bg-muted disabled:opacity-50"
               onClick={() => {
                 close();
                 onSignOut();
               }}
               disabled={signOutPending}
             >
-              {signOutPending ? "Signing out…" : "Sign out"}
+              {signOutPending ? (
+                <>
+                  <Spinner className="h-3.5 w-3.5 shrink-0" />
+                  <span>Signing out…</span>
+                </>
+              ) : (
+                "Sign out"
+              )}
             </button>
           </div>
         </div>

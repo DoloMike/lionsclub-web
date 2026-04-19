@@ -1,4 +1,5 @@
 import { addChapterEvent, deleteChapterEvent } from "../actions";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export default async function AdminChapterEventsPage() {
@@ -17,13 +18,16 @@ export default async function AdminChapterEventsPage() {
         chapter meetings you want visitors to see.
       </p>
 
-      <ul className="mt-8 divide-y divide-border rounded-lg border border-border">
-        {(events ?? []).length === 0 ? (
-          <li className="px-4 py-6 text-sm text-muted-foreground">
-            No events yet — add one below.
-          </li>
-        ) : (
-          (events ?? []).map((ev) => (
+      {(events ?? []).length === 0 ? (
+        <div className="mt-8">
+          <EmptyState
+            title="No events yet"
+            description="Use the form below to add the chapter's next parade, screening, meeting, or fundraiser."
+          />
+        </div>
+      ) : (
+        <ul className="mt-8 divide-y divide-border rounded-lg border border-border">
+          {(events ?? []).map((ev) => (
             <li
               key={ev.id}
               className="flex flex-wrap items-start justify-between gap-4 px-4 py-4"
@@ -49,9 +53,9 @@ export default async function AdminChapterEventsPage() {
                 </button>
               </form>
             </li>
-          ))
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
 
       <form action={addChapterEvent} className="mt-10 max-w-md space-y-4">
         <h2 className="text-lg font-semibold text-foreground">Add event</h2>

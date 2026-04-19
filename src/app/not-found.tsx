@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Container } from "@/components/Container";
+import { ButtonLink } from "@/components/ui/Button";
 
 export default function NotFound() {
   return (
@@ -12,12 +12,9 @@ export default function NotFound() {
         <p className="mt-4 max-w-md text-muted-foreground">
           That page doesn&apos;t exist or may have moved.
         </p>
-        <Link
-          href="/"
-          className="mt-8 inline-flex rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-card-foreground transition hover:bg-muted"
-        >
+        <ButtonLink href="/" variant="secondary" size="lg" className="mt-8">
           Go home
-        </Link>
+        </ButtonLink>
       </Container>
     </div>
   );

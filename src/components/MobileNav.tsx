@@ -7,6 +7,7 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { useSignOut } from "@/components/auth/useSignOut";
 import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
+import { Spinner } from "@/components/ui/Spinner";
 import { isAdminRole, isChapterMember } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
 import { isNavHrefActive, mainNav, mobileNavLinkClassName } from "@/lib/nav";
@@ -95,8 +96,8 @@ export function MobileNav() {
         type="button"
         className={
           open
-            ? "inline-flex items-center justify-center rounded-md border-2 border-primary bg-background px-3 py-2 text-sm font-semibold text-foreground shadow-md ring-2 ring-primary/25 transition hover:bg-muted"
-            : "inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
+            ? "inline-flex items-center justify-center rounded-md border-2 border-primary bg-background px-3 py-2 text-sm font-semibold text-foreground shadow-md ring-2 ring-primary/25 transition-colors duration-150 hover:bg-muted active:scale-[0.97]"
+            : "inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors duration-150 hover:bg-muted active:scale-[0.97]"
         }
         aria-expanded={open}
         aria-controls="mobile-nav-panel"
@@ -132,14 +133,14 @@ export function MobileNav() {
           {/* Below the sticky header only — a full-screen inset-0 layer sat above the logo
               (later in DOM + z-30) and made the bar + close control look grayed out. */}
           <div
-            className="fixed inset-x-0 bottom-0 top-14 z-30 bg-black/40 sm:top-16"
+            className="fixed inset-x-0 bottom-0 top-14 z-30 bg-black/40 animate-fade-in sm:top-16"
             aria-hidden
             onClick={() => setOpen(false)}
           />
           <nav
             ref={panelRef}
             id="mobile-nav-panel"
-            className="fixed inset-x-0 top-14 z-50 flex max-h-[calc(100dvh-3.5rem)] flex-col overflow-hidden border-b border-border bg-card shadow-lg sm:top-16"
+            className="fixed inset-x-0 top-14 z-50 flex max-h-[calc(100dvh-3.5rem)] flex-col overflow-hidden border-b border-border bg-card shadow-popover animate-slide-down-in sm:top-16"
             aria-label="Mobile"
           >
             <div className="min-h-0 overflow-y-auto">
@@ -215,14 +216,21 @@ export function MobileNav() {
                     <li>
                       <button
                         type="button"
-                        className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-base font-medium text-foreground transition-colors duration-150 hover:bg-muted disabled:opacity-50"
                         disabled={signOutPending}
                         onClick={() => {
                           setOpen(false);
                           void signOut();
                         }}
                       >
-                        {signOutPending ? "Signing out…" : "Sign out"}
+                        {signOutPending ? (
+                          <>
+                            <Spinner className="h-4 w-4 shrink-0" />
+                            <span>Signing out…</span>
+                          </>
+                        ) : (
+                          "Sign out"
+                        )}
                       </button>
                     </li>
                   </ul>

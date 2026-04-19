@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { ExternalLink } from "@/components/ExternalLink";
+import { ButtonLink, buttonClassName } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { googleMapsSearchUrl } from "@/lib/maps-links";
 import { site } from "@/lib/site";
 
@@ -39,7 +42,7 @@ const impact = [
     body: "We live and work here—service starts with Hancock County.",
   },
   {
-    title: "Concrete help",
+    title: "Real-world help",
     body: "Eyeglasses, screenings, scholarships, and hands-on community support.",
   },
   {
@@ -48,19 +51,28 @@ const impact = [
   },
 ] as const;
 
+/**
+ * On mobile (`flex-col`) the primary CTA used to stretch via `flex` while the
+ * secondary stayed intrinsic-width, leaving the row visually unbalanced.
+ * Forcing `w-full sm:w-auto` on every direct child fixes it without any
+ * per-button changes.
+ */
+const ctaRow =
+  "mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto";
+
 export function Landing() {
   return (
     <>
       <section
-        className="border-b border-border bg-gradient-to-b from-section-warm via-muted/30 to-background"
+        className="bg-gradient-to-b from-section-warm via-muted/30 to-background"
         aria-labelledby="hero-heading"
       >
         <Container className="py-16 sm:py-24 lg:py-28">
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-7">
-              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
+              <Eyebrow tone="primary">
                 {site.location} · {site.district}
-              </p>
+              </Eyebrow>
               <h1
                 id="hero-heading"
                 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
@@ -73,29 +85,25 @@ export function Landing() {
                 community events, we&apos;re your neighbors, improving health and
                 opportunity close to home.
               </p>
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <Link
-                  href="/membership"
-                  className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-                >
+              <div className={ctaRow}>
+                <ButtonLink href="/membership" size="lg">
                   Join us
-                </Link>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-primary underline-offset-4 hover:underline"
-                >
+                </ButtonLink>
+                <ButtonLink href="/contact" variant="secondary" size="lg">
                   Contact
-                </Link>
+                </ButtonLink>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-md ring-1 ring-border/60 lg:col-span-5">
+            <Card
+              padding="md"
+              ring
+              className="relative overflow-hidden transition-shadow duration-200 hover:shadow-card-hover lg:col-span-5"
+            >
               <div
                 className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/15 blur-2xl"
                 aria-hidden
               />
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                In our community
-              </p>
+              <Eyebrow>In our community</Eyebrow>
               <p className="mt-3 text-sm font-medium leading-relaxed text-foreground">
                 Meetings and service projects are rooted at{" "}
                 <span className="text-primary">{site.address.venue}</span>—the
@@ -116,12 +124,12 @@ export function Landing() {
               >
                 About the chapter
               </Link>
-            </div>
+            </Card>
           </div>
         </Container>
       </section>
 
-      <section className="border-b border-border py-14" aria-labelledby="mission">
+      <section className="py-14" aria-labelledby="mission">
         <Container>
           <h2
             id="mission"
@@ -147,7 +155,7 @@ export function Landing() {
       </section>
 
       <section
-        className="border-b border-border bg-muted/30 py-14"
+        className="border-y border-border/60 bg-muted/30 py-14"
         aria-labelledby="impact-strip"
       >
         <Container>
@@ -181,7 +189,7 @@ export function Landing() {
             {programs.map((p) => (
               <li
                 key={p.title}
-                className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+                className="rounded-xl border border-border/70 bg-card/60 p-6"
               >
                 <h3 className="text-lg font-semibold text-card-foreground">
                   {p.title}
@@ -204,7 +212,7 @@ export function Landing() {
       </section>
 
       <section
-        className="border-y border-border bg-muted/30 py-14"
+        className="border-y border-border/60 bg-muted/30 py-14"
         aria-labelledby="fundraiser"
       >
         <Container>
@@ -222,19 +230,13 @@ export function Landing() {
                 this section and the site banner for the next round.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/fundraising"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-              >
+            <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
+              <ButtonLink href="/fundraising" size="lg">
                 Fundraising details
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-card-foreground transition hover:bg-muted"
-              >
+              </ButtonLink>
+              <ButtonLink href="/contact" variant="secondary" size="lg">
                 Get notified
-              </Link>
+              </ButtonLink>
             </div>
           </div>
         </Container>
@@ -242,7 +244,7 @@ export function Landing() {
 
       <section className="py-14" aria-labelledby="membership-cta">
         <Container>
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-sm sm:p-10">
+          <Card padding="xl">
             <h2
               id="membership-cta"
               className="text-2xl font-bold tracking-tight text-foreground"
@@ -254,26 +256,20 @@ export function Landing() {
               commitments—no pressure, just conversation. Member sign-in for
               accounts is planned for a later phase.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/membership"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-              >
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">
+              <ButtonLink href="/membership" size="lg">
                 Membership information
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-full border border-border px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
-              >
+              </ButtonLink>
+              <ButtonLink href="/contact" variant="secondary" size="lg">
                 Ask a question
-              </Link>
+              </ButtonLink>
             </div>
-          </div>
+          </Card>
         </Container>
       </section>
 
       <section
-        className="border-t border-border bg-muted/20 py-14"
+        className="border-t border-border/60 bg-muted/20 py-14"
         aria-labelledby="events-teaser"
       >
         <Container>
@@ -312,24 +308,21 @@ export function Landing() {
             humanitarian work, LCIF is the foundation arm of Lions Clubs
             International.
           </p>
-          <p className="mt-6 flex flex-wrap gap-4">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-            >
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">
+            <ButtonLink href="/contact" size="lg">
               Contact about giving locally
-            </Link>
+            </ButtonLink>
             <ExternalLink
               href={site.lcifUrl}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-card-foreground transition hover:bg-muted"
+              className={buttonClassName({ variant: "secondary", size: "lg" })}
             >
               Learn about LCIF
             </ExternalLink>
-          </p>
+          </div>
         </Container>
       </section>
 
-      <section className="border-t border-border py-14" aria-labelledby="contact-teaser">
+      <section className="border-t border-border/60 py-14" aria-labelledby="contact-teaser">
         <Container>
           <h2
             id="contact-teaser"

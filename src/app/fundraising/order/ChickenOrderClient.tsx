@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { FundraisingTrustCallout } from "@/components/fundraising/FundraisingTrustCallout";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { fieldClassName } from "@/components/ui/field";
 import type { FundraiserEventRow } from "@/lib/data/fundraiser";
 import { formatInstantInTimezone } from "@/lib/datetime";
 import { FUNDRAISER_INSTANT_DISPLAY_TIMEZONE } from "@/lib/fundraiser-dates";
@@ -76,6 +79,12 @@ export function ChickenOrderClient({
   const [loading, setLoading] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [quantityTouched, setQuantityTouched] = useState(false);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (!error) return;
+    errorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [error]);
 
   const selected = useMemo(
     () => events.find((e) => e.id === eventId),
@@ -185,8 +194,10 @@ export function ChickenOrderClient({
       <Container>
         <div className="mx-auto max-w-lg">
           <BackToFundraisingLink />
-          <div
-            className="mt-6 space-y-6 rounded-2xl border border-border bg-card p-6 shadow-lg ring-1 ring-border/60 sm:p-8"
+          <Card
+            elevation="raised"
+            ring
+            className="mt-6 space-y-6"
             role="region"
             aria-labelledby="chicken-order-heading"
           >
@@ -222,7 +233,7 @@ export function ChickenOrderClient({
               }
             }}
             disabled={loading}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:opacity-60"
+            className={fieldClassName("mt-1")}
           >
             {/* Title only — long deadline strings here force iOS to widen the
                 native select box past the viewport, breaking mobile layout.
@@ -286,11 +297,7 @@ export function ChickenOrderClient({
             aria-describedby={
               showQuantityError ? "quantity-error" : undefined
             }
-            className={`mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm disabled:opacity-60 ${
-              showQuantityError
-                ? "border-destructive ring-1 ring-destructive/40"
-                : "border-border"
-            }`}
+            className={fieldClassName("mt-1 tabular-nums")}
           >
             {Array.from({ length: maxQ }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
@@ -323,7 +330,7 @@ export function ChickenOrderClient({
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             disabled={loading}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:opacity-60"
+            className={fieldClassName("mt-1")}
             autoComplete="name"
           />
         </div>
@@ -340,11 +347,7 @@ export function ChickenOrderClient({
             disabled={loading}
             aria-invalid={showEmailError}
             aria-describedby={showEmailError ? "email-error" : undefined}
-            className={`mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm disabled:opacity-60 ${
-              showEmailError
-                ? "border-destructive ring-1 ring-destructive/40"
-                : "border-border"
-            }`}
+            className={fieldClassName("mt-1")}
             autoComplete="email"
           />
           {showEmailError ? (
@@ -362,7 +365,7 @@ export function ChickenOrderClient({
             value={customerPhone}
             onChange={(e) => setCustomerPhone(e.target.value)}
             disabled={loading}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:opacity-60"
+            className={fieldClassName("mt-1")}
             autoComplete="tel"
           />
         </div>
@@ -375,7 +378,7 @@ export function ChickenOrderClient({
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             disabled={loading}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:opacity-60"
+            className={fieldClassName("mt-1")}
           />
         </div>
 
@@ -391,24 +394,25 @@ export function ChickenOrderClient({
         </div>
 
         {error ? (
-          <p className="text-sm text-destructive" role="alert">
+          <p
+            ref={errorRef}
+            className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
 
-        <button
-          type="button"
+        <Button
           onClick={() => void handlePay()}
-          disabled={loading || !stripeReady || !selected}
-          aria-busy={loading}
-          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+          disabled={!stripeReady || !selected}
+          pending={loading}
+          pendingLabel="Redirecting to checkout…"
+          size="lg"
+          className="w-full"
         >
-          {loading
-            ? "Redirecting to checkout…"
-            : stripeReady
-              ? "Continue to payment"
-              : "Payment not configured"}
-        </button>
+          {stripeReady ? "Continue to payment" : "Payment not configured"}
+        </Button>
 
         {!stripeReady ? (
           <p className="text-xs text-muted-foreground">
@@ -421,7 +425,7 @@ export function ChickenOrderClient({
             to order by email.
           </p>
         ) : null}
-          </div>
+          </Card>
         </div>
       </Container>
     </div>

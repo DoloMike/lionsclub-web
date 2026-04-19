@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/Button";
 import type { FundraiserBannerSegment } from "@/lib/data/fundraiser-banner";
 import { googleMapsSearchUrl } from "@/lib/maps-links";
 
@@ -6,13 +7,13 @@ function PickupBannerLocation({ label }: { label: string }) {
   const href = googleMapsSearchUrl(label);
   if (!href) return null;
   return (
-    <p className="mt-0.5 text-sm text-amber-900/90 dark:text-amber-200/90">
+    <p className="mt-0.5 text-sm text-warning-foreground/85">
       <strong>Pickup location:</strong>{" "}
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-medium text-amber-950 underline-offset-2 hover:underline dark:text-amber-100"
+        className="font-medium text-warning-foreground underline-offset-2 hover:underline"
       >
         {label}
       </a>
@@ -35,17 +36,17 @@ export function FundraiserOrderBanner({
       {segments.map((s) => (
         <div
           key={s.bannerKey}
-          className="campaign-banner border-b border-amber-300/80 bg-gradient-to-r from-amber-100 via-amber-50 to-amber-100 ring-1 ring-inset ring-accent/25 dark:border-amber-900/50 dark:from-amber-950/50 dark:via-amber-950/30 dark:to-amber-950/50 dark:ring-accent/20"
+          className="campaign-banner border-b border-warning-border bg-gradient-to-r from-warning-bg via-warning-bg/85 to-warning-bg ring-1 ring-inset ring-accent/20"
           role="region"
           aria-label="Chicken cook fundraiser"
         >
           <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8">
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-amber-950 dark:text-amber-100">
+              <p className="font-semibold text-warning-foreground">
                 {s.headline}
               </p>
               {s.summary ? (
-                <p className="mt-0.5 text-sm text-amber-900/90 dark:text-amber-200/90">
+                <p className="mt-0.5 text-sm text-warning-foreground/85">
                   {s.summary}
                 </p>
               ) : null}
@@ -55,16 +56,13 @@ export function FundraiserOrderBanner({
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">
               {s.showOrderButton ? (
-                <Link
-                  href="/fundraising/order"
-                  className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-                >
+                <ButtonLink href="/fundraising/order" size="md">
                   Order chickens
-                </Link>
+                </ButtonLink>
               ) : null}
               <Link
                 href="/fundraising"
-                className="text-sm font-medium text-amber-950/80 underline-offset-4 hover:underline dark:text-amber-200/90"
+                className="text-sm font-medium text-warning-foreground/85 underline-offset-4 transition-colors hover:text-warning-foreground hover:underline"
               >
                 Details
               </Link>

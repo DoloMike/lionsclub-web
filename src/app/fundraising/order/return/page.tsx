@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container } from "@/components/Container";
+import { ButtonLink } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isStripeConfigured } from "@/lib/env";
 import { recordPaidChickenOrder } from "@/lib/data/record-paid-chicken-order";
 import { getStripe } from "@/lib/stripe";
@@ -122,9 +125,7 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
   return (
     <div className="border-b border-border bg-gradient-to-b from-primary/10 to-muted/20 py-16">
       <Container>
-        <p className="font-mono text-xs font-semibold uppercase tracking-widest text-primary">
-          Payment received
-        </p>
+        <Eyebrow tone="primary">Payment received</Eyebrow>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
           Thank you — your order is confirmed
         </h1>
@@ -134,7 +135,7 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
         </p>
 
         {eventSummary ? (
-          <div className="mt-8 max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <Card padding="md" className="mt-8 max-w-lg">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Pickup summary
             </h2>
@@ -158,7 +159,7 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
                 {eventSummary.pickup_notes}
               </p>
             ) : null}
-          </div>
+          </Card>
         ) : null}
 
         <ul className="mt-8 max-w-xl list-inside list-disc space-y-2 text-sm text-muted-foreground">
@@ -177,18 +178,12 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
         </ul>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <Link
-            href="/fundraising"
-            className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-          >
+          <ButtonLink href="/fundraising" size="lg">
             Fundraising info
-          </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-card-foreground transition hover:bg-muted"
-          >
+          </ButtonLink>
+          <ButtonLink href="/" variant="secondary" size="lg">
             Home
-          </Link>
+          </ButtonLink>
         </div>
       </Container>
     </div>

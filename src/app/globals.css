@@ -30,6 +30,28 @@
   --destructive-foreground: #ffffff;
   /* Stronger gold-tint band for civic sections (light mode) */
   --section-warm: #faf3e6;
+  /* Warm-tone banner family (replaces ad-hoc amber-50/100/200 in code) */
+  --warning-bg: #fdf6e3;
+  --warning-foreground: #5b3a06;
+  --warning-border: #f1d68a;
+
+  /* Animation timing (used via inline transition utilities + CSS vars) */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 250ms;
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Warm-tinted shadow elevation tokens (cards / popovers / dropdowns).
+     Slightly tan undertone reads as "paper" on the warm background. */
+  --shadow-card:
+    0 1px 0 rgba(15, 23, 42, 0.04),
+    0 4px 12px -4px rgba(120, 80, 30, 0.10);
+  --shadow-card-hover:
+    0 1px 0 rgba(15, 23, 42, 0.04),
+    0 10px 24px -8px rgba(120, 80, 30, 0.16);
+  --shadow-popover:
+    0 12px 32px -10px rgba(15, 23, 42, 0.20),
+    0 2px 8px -2px rgba(15, 23, 42, 0.08);
 }
 
 .dark {
@@ -51,6 +73,19 @@
   --destructive: #f87171;
   --destructive-foreground: #450a0a;
   --section-warm: #0f1828;
+  --warning-bg: #2a200b;
+  --warning-foreground: #fde7b5;
+  --warning-border: #4a3a14;
+
+  --shadow-card:
+    0 1px 0 rgba(0, 0, 0, 0.4),
+    0 4px 14px -6px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover:
+    0 1px 0 rgba(0, 0, 0, 0.4),
+    0 10px 26px -10px rgba(0, 0, 0, 0.55);
+  --shadow-popover:
+    0 12px 32px -10px rgba(0, 0, 0, 0.65),
+    0 2px 8px -2px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -71,8 +106,72 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-section-warm: var(--section-warm);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-border: var(--warning-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Smooth scroll for in-page anchors. Reduced-motion is honored by the
+   global media-query block below (transition-duration is forced to ~0). */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reusable elevation utilities backed by tokens (warm-tinted). */
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
+.shadow-card-hover {
+  box-shadow: var(--shadow-card-hover);
+}
+.shadow-popover {
+  box-shadow: var(--shadow-popover);
+}
+
+/*
+ * Lightweight enter animations. We can't use the `animate-in` family without
+ * the `tailwindcss-animate` plugin, so we ship the small keyframes used here
+ * directly. Both honor `prefers-reduced-motion` via the global block below.
+ */
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ui-slide-down-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ui-slide-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: ui-fade-in var(--duration-fast) ease-out both;
+}
+.animate-slide-down-in {
+  animation: ui-slide-down-in var(--duration-base) var(--ease-out-soft) both;
+}
+.animate-slide-up-in {
+  animation: ui-slide-up-in var(--duration-base) var(--ease-out-soft) both;
 }
 
 body {

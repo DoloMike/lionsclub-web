@@ -35,7 +35,10 @@ export function LoginPanel({
   return (
     <div className="mx-auto max-w-md px-4 py-12">
       {error === "oauth" ? (
-        <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+        <p
+          className="mb-6 rounded-lg border border-warning-border bg-warning-bg px-4 py-3 text-sm text-warning-foreground"
+          role="status"
+        >
           {message ?? "Google sign-in failed. Try again."}
         </p>
       ) : null}
