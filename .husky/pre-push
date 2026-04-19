@@ -3,3 +3,11 @@ set -e
 
 # Last line of defense before Coolify: same check as Docker (frozen lockfile).
 bun run check:lockfile
+
+# Catch missing exports / type errors locally so we don't find out from CI.
+# `next build` would also catch these but is slower; tsc is enough for the
+# class of bug (e.g. "Export X doesn't exist in target module").
+bun run type-check
+
+# Surface lint regressions before they reach review.
+bun run lint
