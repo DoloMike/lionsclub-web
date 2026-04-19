@@ -85,9 +85,24 @@ test.describe("Chicken ordering — manual e2e (Stripe test mode only)", () => {
     );
 
     // Use a unique test email so Stripe test customer records are easy to
-    // grep for in the dashboard / logs.
+    // grep for in the dashboard / logs. Override with `E2E_BUYER_EMAIL` when
+    // you want the Stripe test-mode receipt to land in a real inbox so you
+    // can verify deliverability end-to-end.
+    //
+    // The chicken-order route's idempotency key is
+    // `chk_<eventId>_<email>_<qty>_<YYYY-MM-DD>`, so two runs with the same
+    // email + quantity + event in the same day collide on Stripe's side.
+    // To make the override safe to re-run, we splice a per-run tag into the
+    // local part using `+` aliasing — Gmail/Outlook ignore the suffix when
+    // routing to the inbox but Stripe sees a brand-new email each time.
     const stamp = Date.now();
-    const email = `e2e+chicken-${stamp}@example.com`;
+    const buyerOverride = process.env.E2E_BUYER_EMAIL?.trim();
+    const email = buyerOverride
+      ? buyerOverride.replace(
+          /^([^+@]+)(\+[^@]*)?(@.+)$/,
+          `$1+lions-e2e-${stamp}$3`,
+        )
+      : `e2e+chicken-${stamp}@example.com`;
 
     await fieldNextToLabel(page, "Quantity").selectOption({ index: 0 });
     await fieldNextToLabel(page, "Name (optional)").fill("E2E Test Buyer");
@@ -101,6 +116,17 @@ test.describe("Chicken ordering — manual e2e (Stripe test mode only)", () => {
       page.waitForURL(/checkout\.stripe\.com/, { timeout: 30_000 }),
       page.getByRole("button", { name: /continue to payment/i }).click(),
     ]);
+
+    // If the buyer's email is registered with Stripe Link, Checkout opens
+    // straight into Link's "Confirm it's you" OTP screen instead of the
+    // normal payment accordion. There's always a "Pay without Link" escape
+    // hatch on those screens — click it so we drop back to the card form.
+    const payWithoutLink = page.getByRole("button", {
+      name: /pay without link/i,
+    });
+    if (await payWithoutLink.isVisible().catch(() => false)) {
+      await payWithoutLink.click();
+    }
 
     // The current Stripe Checkout layout is a payment-method accordion:
     // Link (with phone capture) is highlighted by default and Card is
