@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const url = env.supabase.url;
   const anonKey = env.supabase.anonKey;
 
-  if (!env.supabase.url || !anonKey) {
+  if (!url || !anonKey) {
     return NextResponse.json({ ok: true });
   }
 
@@ -32,10 +32,15 @@ export async function POST(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
+      // @supabase/ssr v0.10 passes cache-control headers as the second arg so
+      // auth / token-refresh responses are not cached by CDNs / proxies.
+      setAll(cookiesToSet, headers) {
+        for (const { name, value, options } of cookiesToSet) {
+          response.cookies.set(name, value, options);
+        }
+        for (const [key, value] of Object.entries(headers)) {
+          response.headers.set(key, value);
+        }
       },
     },
   });

@@ -34,11 +34,12 @@ export async function createSupabaseServerClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      // v0.10 passes cache-control headers as the second arg.
+      setAll(cookiesToSet, _headers) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          for (const { name, value, options } of cookiesToSet) {
+            cookieStore.set(name, value, options);
+          }
         } catch {
           // Called from a Server Component — middleware refreshes session.
         }

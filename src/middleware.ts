@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
   // middleware to read different cookie keys than the callback set.
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !anonKey) {
+  if (!url || !anonKey) {
     return supabaseResponse;
   }
 
@@ -34,10 +34,15 @@ export async function middleware(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
-        );
+      // @supabase/ssr v0.10 passes cache-control headers as the second arg so
+      // auth / token-refresh responses are not cached by CDNs / proxies.
+      setAll(cookiesToSet, headers) {
+        for (const { name, value, options } of cookiesToSet) {
+          supabaseResponse.cookies.set(name, value, options);
+        }
+        for (const [key, value] of Object.entries(headers)) {
+          supabaseResponse.headers.set(key, value);
+        }
       },
     },
   });
