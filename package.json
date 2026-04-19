@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "check:lockfile": "bun install --frozen-lockfile",
     "set-role": "node --env-file=.env.local scripts/set-profile-role.mjs",
     "generate-favicon": "node scripts/generate-favicon.mjs"
   },

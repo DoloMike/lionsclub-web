@@ -6,6 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Stack notes
 
+- **Dependencies:** Use **Bun** only (`bun install`, `bun add`). This repo’s lockfile is **`bun.lock`** (`package-lock.json` is gitignored). Any change to **`package.json`** must include an updated **`bun.lock`** (run `bun install` and commit). Docker/Coolify and CI run **`bun install --frozen-lockfile`** and will fail if they drift. Before pushing dep changes, run **`bun run check:lockfile`** locally.
 - Shared UI lives under `src/components/` (not under `src/app/`).
 - Supabase: `@/lib/supabase/browser` (anon, client-safe) vs `@/lib/supabase/admin` (service role, `server-only`), `server-client` (cookie session), `public-server` (anon reads without a user).
 - Env access goes through `src/lib/env.ts` so keys stay consistent.

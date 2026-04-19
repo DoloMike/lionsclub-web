@@ -25,7 +25,8 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          # Keep in sync with Dockerfile.coolify (oven/bun:1.2-alpine).
+          bun-version: "1.2"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
