@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { useCallback } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { SessionProfile } from "@/lib/auth/session-profile";
 import { isAdminRole, isChapterMember, roleLabel } from "@/lib/auth/roles";
-import { env } from "@/lib/env";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { useSignOut } from "@/components/auth/useSignOut";
 
 function readMetaString(
   meta: User["user_metadata"],
@@ -202,36 +202,22 @@ export function HeaderAuthControls({
   const router = useRouter();
   const { pending: oauthPending, signIn: signInWithGoogleOAuth } =
     useGoogleOAuthSignIn();
-  const [signOutPending, setSignOutPending] = useState(false);
+  const { signOut, signOutPending } = useSignOut();
 
-  const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
+  const hasSupabase = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   useEffect(() => {
     if (!hasSupabase) return;
-    const supabase = createBrowserSupabaseClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      router.refresh();
-    });
-    return () => subscription.unsubscribe();
-  }, [hasSupabase, router]);
-
-  const signOut = useCallback(async () => {
-    if (!hasSupabase) return;
-    setSignOutPending(true);
-    try {
+    // Lazy-import browser client only when needed
+    import("@/lib/supabase/browser").then(({ createBrowserSupabaseClient }) => {
       const supabase = createBrowserSupabaseClient();
-      await supabase.auth.signOut();
-      await fetch("/auth/signout", {
-        method: "POST",
-        credentials: "include",
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(() => {
+        router.refresh();
       });
-      router.push("/");
-      router.refresh();
-    } finally {
-      setSignOutPending(false);
-    }
+      return () => subscription.unsubscribe();
+    });
   }, [hasSupabase, router]);
 
   if (!hasSupabase) {

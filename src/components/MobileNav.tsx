@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
+import { useSignOut } from "@/components/auth/useSignOut";
 import type { SessionProfile } from "@/lib/auth/session-profile";
 import { isAdminRole, isChapterMember } from "@/lib/auth/roles";
 import { env } from "@/lib/env";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isNavHrefActive, mainNav, mobileNavLinkClassName } from "@/lib/nav";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -19,31 +19,14 @@ function getFocusable(panel: HTMLElement): HTMLElement[] {
 }
 
 export function MobileNav({ session }: { session: SessionProfile | null }) {
-  const router = useRouter();
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
-  const [signOutPending, setSignOutPending] = useState(false);
+  const { signOut, signOutPending } = useSignOut();
   const { pending: googlePending, signIn } = useGoogleOAuthSignIn();
   const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
   const admin = session ? isAdminRole(session.role) : false;
   const chapterMember = session ? isChapterMember(session.role) : false;
 
-  const signOut = useCallback(async () => {
-    if (!hasSupabase) return;
-    setSignOutPending(true);
-    try {
-      const supabase = createBrowserSupabaseClient();
-      await supabase.auth.signOut();
-      await fetch("/auth/signout", {
-        method: "POST",
-        credentials: "include",
-      });
-      router.push("/");
-      router.refresh();
-    } finally {
-      setSignOutPending(false);
-    }
-  }, [hasSupabase, router]);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
