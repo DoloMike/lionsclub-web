@@ -28,8 +28,9 @@ Single place for **what’s done** in this repo and **what’s next**. Deeper pr
    - `NEXT_PUBLIC_NOINDEX` — `false` for production (use `true` on staging/preview).
    - `NEXT_PUBLIC_SITE_TIMEZONE` — e.g. `America/Kentucky/Louisville` if different from default.
 3. **Supabase (prod)** — Run the same migrations as local (`supabase/migrations/` order) on the production database. Configure **Auth → URL configuration** with production site URL + `/auth/callback`. **Google provider:** authorized redirect URIs must include Supabase’s callback URL.
-4. **Stripe (prod)** — Enable live mode; confirm **Checkout** redirect URLs match your domain; enable customer receipt emails in Dashboard if you want Stripe to email buyers.
-5. **Smoke test** — Health check `GET /api/health`, key public pages, admin login, one test order with **live** card in a controlled dry run (or final verification on staging with live keys behind auth).
+4. **Stripe (prod)** — Enable live mode; confirm **Checkout** redirect URLs match your domain; enable customer receipt emails in Dashboard (**Settings → Emails → Successful payments**) so buyers get a receipt. The chicken-order route also sets `payment_intent_data.receipt_email` per session as a belt-and-suspenders, so even if the dashboard toggle ever flips off the per-session request still asks Stripe to email.
+   - **Test/sandbox caveat:** Stripe **does not** auto-send customer receipts in test or sandbox mode, even when `receipt_email` is set and the dashboard toggle is on. The Charge is still generated with a `receipt_url` and a manual **Send receipt** from the Charge page in the dashboard delivers to a real inbox (good for verifying template + branding + deliverability). Auto-sends only fire under live keys — verify in step 5.
+5. **Smoke test** — Health check `GET /api/health`, key public pages, admin login, one test order with **live** card in a controlled dry run (or final verification on staging with live keys behind auth). Confirm the Stripe receipt actually lands in the buyer's inbox within ~30s — this is the only definitive test of the auto-send path since test mode suppresses it.
 
 ---
 
