@@ -6,34 +6,25 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 const fetchPaidChickenEventIds = unstable_cache(
   async (userIdKey: string, emailKey: string): Promise<string[]> => {
     const admin = getSupabaseAdmin();
+    const filters: string[] = [];
+    if (userIdKey) filters.push(`user_id.eq.${userIdKey}`);
+    if (emailKey) filters.push(`customer_email.eq.${emailKey}`);
+    if (filters.length === 0) return [];
+
+    const { data } = await admin
+      .from("chicken_orders")
+      .select("event_id")
+      .eq("status", "paid")
+      .or(filters.join(","));
+
     const ids = new Set<string>();
-
-    if (userIdKey) {
-      const { data } = await admin
-        .from("chicken_orders")
-        .select("event_id")
-        .eq("status", "paid")
-        .eq("user_id", userIdKey);
-      for (const row of data ?? []) {
-        if (row.event_id) ids.add(row.event_id);
-      }
+    for (const row of data ?? []) {
+      if (row.event_id) ids.add(row.event_id);
     }
-
-    if (emailKey) {
-      const { data } = await admin
-        .from("chicken_orders")
-        .select("event_id")
-        .eq("status", "paid")
-        .eq("customer_email", emailKey);
-      for (const row of data ?? []) {
-        if (row.event_id) ids.add(row.event_id);
-      }
-    }
-
     return [...ids].sort();
   },
   ["paid-chicken-event-ids"],
-  { revalidate: 60 }
+  { revalidate: 60, tags: ["chicken-orders"] }
 );
 
 /** Paid orders for this user (by `user_id` or `customer_email`) — for banner suppression. */

@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { env } from "../env";
 
 function publicCookieDomain(): string | undefined {
@@ -48,9 +49,12 @@ function publicSupabaseUrl(): string {
   return env.supabase.url;
 }
 
-/** Browser / Client Components — anon key only. */
-export function createBrowserSupabaseClient() {
-  return createBrowserClient(publicSupabaseUrl(), env.supabase.anonKey, {
+let _browserClient: SupabaseClient | null = null;
+
+/** Browser / Client Components — anon key only. Singleton to avoid duplicate listeners. */
+export function createBrowserSupabaseClient(): SupabaseClient {
+  if (_browserClient) return _browserClient;
+  _browserClient = createBrowserClient(publicSupabaseUrl(), env.supabase.anonKey, {
     auth: {
       detectSessionInUrl: true,
       flowType: "pkce",
@@ -62,4 +66,5 @@ export function createBrowserSupabaseClient() {
       domain: publicCookieDomain(),
     },
   });
+  return _browserClient;
 }

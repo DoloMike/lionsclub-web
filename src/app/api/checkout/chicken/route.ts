@@ -112,14 +112,18 @@ export async function POST(request: Request) {
   const totalCents = unitPrice * quantity;
 
   if (event.inventory_units != null) {
-    const { data: agg } = await admin
-      .from("chicken_orders")
-      .select("quantity")
-      .eq("event_id", eventId)
-      .neq("status", "cancelled");
-
-    const sold = (agg ?? []).reduce((s, row) => s + (row.quantity ?? 0), 0);
-    if (sold + quantity > event.inventory_units) {
+    const { data: sold, error: soldErr } = await admin.rpc(
+      "chicken_event_sold",
+      { p_event_id: eventId }
+    );
+    if (soldErr) {
+      return NextResponse.json(
+        { error: "Inventory check failed." },
+        { status: 500 }
+      );
+    }
+    const soldUnits = typeof sold === "number" ? sold : 0;
+    if (soldUnits + quantity > event.inventory_units) {
       return NextResponse.json(
         { error: "Not enough inventory left for this event." },
         { status: 400 }
@@ -133,35 +137,49 @@ export async function POST(request: Request) {
     "http://localhost:3000";
   const base = origin.replace(/\/$/, "");
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          unit_amount: unitPrice,
-          product_data: {
-            name: event.title,
-            description: `${quantity} × chicken (fundraising order)`,
+  const idemDay = new Date().toISOString().slice(0, 10);
+  const idempotencyKeyRaw =
+    `chk_${event.id}_${customerEmail}_${quantity}_${idemDay}`.replace(
+      /\s+/g,
+      ""
+    );
+  const idempotencyKey =
+    idempotencyKeyRaw.length > 255
+      ? idempotencyKeyRaw.slice(0, 255)
+      : idempotencyKeyRaw;
+
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            unit_amount: unitPrice,
+            product_data: {
+              name: event.title,
+              description: `${quantity} × chicken (fundraising order)`,
+            },
           },
+          quantity,
         },
-        quantity,
-      },
-    ],
-    customer_email: customerEmail,
-    metadata: {
-      event_id: event.id,
-      quantity: String(quantity),
-      unit_price_cents: String(unitPrice),
-      total_cents: String(totalCents),
+      ],
       customer_email: customerEmail,
-      customer_phone: customerPhone,
-      customer_name: customerName,
-      notes,
+      metadata: {
+        event_id: event.id,
+        quantity: String(quantity),
+        unit_price_cents: String(unitPrice),
+        total_cents: String(totalCents),
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        customer_name: customerName,
+        notes,
+      },
+      success_url: `${base}/fundraising/order/return?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${base}/fundraising/order?canceled=1`,
     },
-    success_url: `${base}/fundraising/order/return?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${base}/fundraising/order?canceled=1`,
-  });
+    { idempotencyKey }
+  );
 
   if (!session.url) {
     return NextResponse.json(

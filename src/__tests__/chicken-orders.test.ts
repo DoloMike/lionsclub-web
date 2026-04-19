@@ -17,11 +17,11 @@ describe("getPaidChickenOrderEventIdsForUser", () => {
     expect(fromMock).not.toHaveBeenCalled();
   });
 
-  it("loads by user_id and email", async () => {
+  it("loads via single paid query with or()", async () => {
     fromMock.mockImplementation(() => ({
       select: () => ({
         eq: () => ({
-          eq: () =>
+          or: () =>
             Promise.resolve({
               data: [{ event_id: "e1" }, { event_id: "e2" }],
             }),
@@ -31,6 +31,7 @@ describe("getPaidChickenOrderEventIdsForUser", () => {
 
     const byUser = await getPaidChickenOrderEventIdsForUser("u1", undefined);
     expect(byUser.has("e1")).toBe(true);
+    expect(byUser.has("e2")).toBe(true);
 
     const byEmail = await getPaidChickenOrderEventIdsForUser(
       undefined,

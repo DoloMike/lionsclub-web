@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
 
   // Use the PUBLIC URL so the cookie key prefix matches what the browser client
   // and callback route use (both derived from NEXT_PUBLIC_SUPABASE_URL).
-  // Cookie names are URL-derived; using internal URL here would cause the
+  // Cookie names are URL-derived; using internal URL would cause the
   // middleware to read different cookie keys than the callback set.
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -55,15 +55,15 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  // Prefer session over getUser — fewer forced round-trips when JWT is still valid.
+  await supabase.auth.getSession();
 
   return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    // Skip auth refresh for static assets, health checks, and SEO files — fewer
-    // edge invocations and no Supabase chatter on probes or crawlers.
-    "/((?!_next/static|_next/image|favicon.ico|api/health|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Static assets, APIs, SEO — skip middleware. Page navigations + auth routes still run.
+    "/((?!api/|_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

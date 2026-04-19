@@ -10,10 +10,13 @@ import {
 } from "react";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { SessionProfile } from "@/lib/auth/session-profile";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
-export type SessionProfileStatus =
-  | { status: "loading" }
-  | { status: "ready"; session: SessionProfile | null };
+/** Always `ready` — initial session comes from the server layout (no header skeleton flash). */
+export type SessionProfileStatus = {
+  status: "ready";
+  session: SessionProfile | null;
+};
 
 const SessionProfileContext = createContext<SessionProfileStatus | null>(null);
 
@@ -29,56 +32,39 @@ async function profileForUser(
   return { user, role: profile?.role ?? "guest" };
 }
 
-export function SessionProfileProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<SessionProfileStatus>({ status: "loading" });
+export function SessionProfileProvider({
+  initial,
+  children,
+}: {
+  initial: SessionProfileStatus;
+  children: ReactNode;
+}) {
+  const [state, setState] = useState<SessionProfileStatus>(initial);
 
   useEffect(() => {
-    let cancelled = false;
-    let subscription: { unsubscribe: () => void } | undefined;
+    const supabase = createBrowserSupabaseClient();
 
-    void import("@/lib/supabase/browser").then(({ createBrowserSupabaseClient }) => {
-      if (cancelled) return;
-      const supabase = createBrowserSupabaseClient();
+    const syncFromUser = async (user: User | null) => {
+      if (!user) {
+        setState({ status: "ready", session: null });
+        return;
+      }
+      try {
+        const session = await profileForUser(supabase, user);
+        setState({ status: "ready", session });
+      } catch {
+        setState({ status: "ready", session: { user, role: "guest" } });
+      }
+    };
 
-      const syncFromUser = async (user: User | null) => {
-        if (cancelled) return;
-        if (!user) {
-          setState({ status: "ready", session: null });
-          return;
-        }
-        try {
-          const session = await profileForUser(supabase, user);
-          if (!cancelled) setState({ status: "ready", session });
-        } catch {
-          if (!cancelled) {
-            setState({ status: "ready", session: { user, role: "guest" } });
-          }
-        }
-      };
-
-      void (async () => {
-        const {
-          data: { session: initial },
-        } = await supabase.auth.getSession();
-        if (cancelled) return;
-        await syncFromUser(initial?.user ?? null);
-        if (cancelled) return;
-
-        const {
-          data: { subscription: sub },
-        } = supabase.auth.onAuthStateChange((event, nextSession) => {
-          if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
-          void syncFromUser(nextSession?.user ?? null);
-        });
-        subscription = sub;
-        if (cancelled) sub.unsubscribe();
-      })();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
+      void syncFromUser(nextSession?.user ?? null);
     });
 
-    return () => {
-      cancelled = true;
-      subscription?.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const value = useMemo(() => state, [state]);

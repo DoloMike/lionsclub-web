@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const getUser = vi.fn().mockResolvedValue({ data: { user: null } });
+const getSession = vi.fn().mockResolvedValue({ data: { session: null } });
 
 vi.mock("@supabase/ssr", () => ({
   createServerClient: vi.fn(() => ({
-    auth: { getUser },
+    auth: { getSession },
   })),
 }));
 
@@ -31,14 +31,14 @@ describe("middleware", () => {
     });
     const res = await middleware(req);
     expect(res.status).toBe(200);
-    expect(getUser).toHaveBeenCalled();
+    expect(getSession).toHaveBeenCalled();
   });
 
-  it("skips getUser when no Supabase auth cookie", async () => {
-    getUser.mockClear();
+  it("skips getSession when no Supabase auth cookie", async () => {
+    getSession.mockClear();
     const req = new NextRequest("https://example.com/about");
     const res = await middleware(req);
     expect(res.status).toBe(200);
-    expect(getUser).not.toHaveBeenCalled();
+    expect(getSession).not.toHaveBeenCalled();
   });
 });

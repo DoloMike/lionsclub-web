@@ -8,7 +8,6 @@ import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { useSignOut } from "@/components/auth/useSignOut";
 import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
 import { isAdminRole, isChapterMember } from "@/lib/auth/roles";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { env } from "@/lib/env";
 import { isNavHrefActive, mainNav, mobileNavLinkClassName } from "@/lib/nav";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -26,7 +25,7 @@ export function MobileNav() {
   const { signOut, signOutPending } = useSignOut();
   const { pending: googlePending, signIn } = useGoogleOAuthSignIn();
   const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
-  const session = auth.status === "ready" ? auth.session : null;
+  const session = auth.session;
   const admin = session ? isAdminRole(session.role) : false;
   const chapterMember = session ? isChapterMember(session.role) : false;
 
@@ -171,18 +170,7 @@ export function MobileNav() {
                   <ThemeToggle />
                 </div>
               </div>
-              {auth.status === "loading" && hasSupabase ? (
-                <div aria-busy="true" aria-label="Loading account">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Account
-                  </p>
-                  <div className="mt-2 space-y-2">
-                    <Skeleton className="h-10 w-full rounded-md" />
-                    <Skeleton className="h-10 w-3/4 rounded-md" />
-                  </div>
-                </div>
-              ) : null}
-              {auth.status === "ready" && session && hasSupabase ? (
+              {session && hasSupabase ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Account
@@ -240,7 +228,7 @@ export function MobileNav() {
                   </ul>
                 </div>
               ) : null}
-              {auth.status === "ready" && !session && hasSupabase ? (
+              {!session && hasSupabase ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Account

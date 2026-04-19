@@ -13,24 +13,33 @@ function pathEnabled(pathname: string): boolean {
 
 export function BackToTop() {
   const pathname = usePathname();
-  const [scrollY, setScrollY] = useState(0);
   const enabled = pathEnabled(pathname);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!enabled) return;
-    const onScroll = () => setScrollY(window.scrollY);
-    onScroll();
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      setVisible(window.scrollY > 420);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [enabled]);
-
-  const visible = enabled && scrollY > 420;
 
   const goTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  if (!visible) return null;
+  if (!enabled || !visible) return null;
 
   return (
     <button

@@ -168,15 +168,13 @@ export async function getFundraiserBannerSegments(
   const today = getTodayYmdInTimezone(tz);
   const nowMs = Date.now();
 
-  const [rows, paidIds] = await Promise.all([
-    getCachedOpenFundraiserRows(today),
-    getPaidChickenOrderEventIdsForUser(
-      session?.user.id,
-      session?.user.email ?? undefined
-    ),
-  ]);
-
+  const rows = await getCachedOpenFundraiserRows(today);
   if (!rows.length) return [];
+
+  const paidIds = await getPaidChickenOrderEventIdsForUser(
+    session?.user.id,
+    session?.user.email ?? undefined
+  );
 
   const ordering: Row[] = [];
   const postDeadline: Row[] = [];

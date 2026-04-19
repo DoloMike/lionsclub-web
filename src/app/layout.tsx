@@ -4,12 +4,16 @@ import "./globals.css";
 import { SessionProfileProvider } from "@/components/auth/SessionProfileProvider";
 import { BackToTop } from "@/components/BackToTop";
 import { Footer } from "@/components/Footer";
-import { FundraiserOrderBannerContainer } from "@/components/fundraising/FundraiserOrderBannerContainer";
+import { FundraiserOrderBanner } from "@/components/fundraising/FundraiserOrderBanner";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { OrganizationJsonLd } from "@/components/JsonLd";
+import { getSessionProfile } from "@/lib/auth/get-session";
 import { getMeetingSchedule, getSocialLinks } from "@/lib/data/chapter-content";
-import { getCachedPublicFundraiserBannerSegments } from "@/lib/data/fundraiser-banner";
+import {
+  getCachedPublicFundraiserBannerSegments,
+  getFundraiserBannerSegments,
+} from "@/lib/data/fundraiser-banner";
 import { LCI_LOGO_DARK_SRC } from "@/lib/brand";
 import { getPublicSiteUrl } from "@/lib/site-url";
 import { defaultDescription, site } from "@/lib/site";
@@ -63,12 +67,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [meetingSchedule, socialLinks, fundraiserBannerSegments] =
-    await Promise.all([
-      getMeetingSchedule(),
-      getSocialLinks(),
-      getCachedPublicFundraiserBannerSegments(),
-    ]);
+  const [meetingSchedule, socialLinks, session] = await Promise.all([
+    getMeetingSchedule(),
+    getSocialLinks(),
+    getSessionProfile(),
+  ]);
+
+  const fundraiserBannerSegments = session
+    ? await getFundraiserBannerSegments(session)
+    : await getCachedPublicFundraiserBannerSegments();
+
+  const sessionInitial = {
+    status: "ready" as const,
+    session,
+  };
 
   return (
     <html
@@ -84,14 +96,12 @@ export default async function RootLayout({
       </head>
       <body className="relative flex min-h-full flex-col bg-background text-foreground">
         <ThemeProvider>
-          <SessionProfileProvider>
+          <SessionProfileProvider initial={sessionInitial}>
             <a href="#main-content" className="skip-link">
               Skip to main content
             </a>
             <Header />
-            <FundraiserOrderBannerContainer
-              initialSegments={fundraiserBannerSegments}
-            />
+            <FundraiserOrderBanner segments={fundraiserBannerSegments} />
             <main
               id="main-content"
               className="flex-1 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,rgba(235,183,0,0.09),transparent_55%)] dark:bg-none"

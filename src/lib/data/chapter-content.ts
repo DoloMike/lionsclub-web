@@ -43,37 +43,53 @@ const getCachedMeetingSchedule = unstable_cache(
     return data.meeting_schedule;
   },
   ["meeting-schedule"],
-  { revalidate: 300 }
+  { revalidate: 300, tags: ["meeting-schedule"] }
 );
 
 export async function getMeetingSchedule(): Promise<string> {
   return getCachedMeetingSchedule();
 }
 
+const getCachedOfficers = unstable_cache(
+  async (): Promise<OfficerRow[]> => {
+    const supabase = createPublicServerClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+      .from("officers")
+      .select("id, name, title, sort_order")
+      .order("sort_order", { ascending: true });
+
+    if (error || !data) return [];
+    return data;
+  },
+  ["officers"],
+  { revalidate: 300, tags: ["officers"] }
+);
+
 export async function getOfficers(): Promise<OfficerRow[]> {
-  const supabase = createPublicServerClient();
-  if (!supabase) return [];
-
-  const { data, error } = await supabase
-    .from("officers")
-    .select("id, name, title, sort_order")
-    .order("sort_order", { ascending: true });
-
-  if (error || !data) return [];
-  return data;
+  return getCachedOfficers();
 }
 
+const getCachedChapterEvents = unstable_cache(
+  async (): Promise<ChapterEventRow[]> => {
+    const supabase = createPublicServerClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+      .from("chapter_events")
+      .select("id, title, event_date, description, sort_order")
+      .order("event_date", { ascending: true });
+
+    if (error || !data) return [];
+    return data;
+  },
+  ["chapter-events"],
+  { revalidate: 300, tags: ["chapter-events"] }
+);
+
 export async function getChapterEvents(): Promise<ChapterEventRow[]> {
-  const supabase = createPublicServerClient();
-  if (!supabase) return [];
-
-  const { data, error } = await supabase
-    .from("chapter_events")
-    .select("id, title, event_date, description, sort_order")
-    .order("event_date", { ascending: true });
-
-  if (error || !data) return [];
-  return data;
+  return getCachedChapterEvents();
 }
 
 const getCachedSocialLinks = unstable_cache(
@@ -107,7 +123,7 @@ const getCachedSocialLinks = unstable_cache(
     return data;
   },
   ["social-links"],
-  { revalidate: 300 }
+  { revalidate: 300, tags: ["social-links"] }
 );
 
 export async function getSocialLinks(): Promise<SocialLinkRow[]> {

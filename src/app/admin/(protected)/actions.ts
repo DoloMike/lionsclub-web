@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { assertAdmin } from "@/lib/auth/assert-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
@@ -32,8 +32,7 @@ export async function updateMeetingSchedule(formData: FormData) {
     .eq("id", 1);
 
   if (error) throw error;
-  revalidatePath("/", "layout");
-  revalidatePath("/membership");
+  updateTag("meeting-schedule");
   redirect("/admin/settings?saved=1");
 }
 
@@ -56,7 +55,7 @@ export async function addOfficer(formData: FormData) {
   });
 
   if (error) throw error;
-  revalidatePath("/about");
+  updateTag("officers");
   redirect("/admin/officers?saved=1");
 }
 
@@ -68,7 +67,7 @@ export async function deleteOfficer(formData: FormData) {
   const { error } = await getSupabaseAdmin().from("officers").delete().eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/about");
+  updateTag("officers");
   redirect("/admin/officers?saved=1");
 }
 
@@ -86,7 +85,7 @@ export async function addChapterEvent(formData: FormData) {
   });
 
   if (error) throw error;
-  revalidatePath("/events");
+  updateTag("chapter-events");
   redirect("/admin/events?saved=1");
 }
 
@@ -101,7 +100,7 @@ export async function deleteChapterEvent(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/events");
+  updateTag("chapter-events");
   redirect("/admin/events?saved=1");
 }
 
@@ -143,7 +142,7 @@ export async function addSocialLink(formData: FormData) {
   });
 
   if (error) throw error;
-  revalidatePath("/", "layout");
+  updateTag("social-links");
   redirect("/admin/social?saved=1");
 }
 
@@ -164,7 +163,7 @@ export async function updateSocialLink(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/", "layout");
+  updateTag("social-links");
   redirect("/admin/social?saved=1");
 }
 
@@ -179,7 +178,7 @@ export async function deleteSocialLink(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
-  revalidatePath("/", "layout");
+  updateTag("social-links");
   redirect("/admin/social?saved=1");
 }
 
@@ -204,10 +203,6 @@ export async function toggleFundraiserOrderOpen(formData: FormData) {
 
   if (error) throw error;
   updateTag("fundraiser-banner");
-  revalidatePath("/", "layout");
-  revalidatePath("/fundraising");
-  revalidatePath("/fundraising/order");
-  revalidatePath("/admin/fundraiser");
   redirect("/admin/fundraiser?saved=1");
 }
 
@@ -268,10 +263,6 @@ export async function updateFundraiserEvent(formData: FormData) {
 
   if (error) throw error;
   updateTag("fundraiser-banner");
-  revalidatePath("/", "layout");
-  revalidatePath("/fundraising");
-  revalidatePath("/fundraising/order");
-  revalidatePath("/admin/fundraiser");
   redirect("/admin/fundraiser?saved=1");
 }
 
@@ -342,9 +333,5 @@ export async function addFundraiserEvent(formData: FormData) {
   }
 
   updateTag("fundraiser-banner");
-  revalidatePath("/", "layout");
-  revalidatePath("/fundraising");
-  revalidatePath("/fundraising/order");
-  revalidatePath("/admin/fundraiser");
   redirect("/admin/fundraiser?saved=1");
 }

@@ -1,10 +1,10 @@
-import Image from "next/image";
 import { LCI_LOGO_DARK_SRC } from "@/lib/brand";
 
 type LionsLogoProps = {
   className?: string;
   /** Shown to screen readers */
   alt?: string;
+  /** Hint for LCP; passed through as `fetchPriority` on the img. */
   priority?: boolean;
 };
 
@@ -17,14 +17,15 @@ export function LionsLogo({
   priority = false,
 }: LionsLogoProps) {
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element -- SVG logo; next/image adds little here
+    <img
       src={LCI_LOGO_DARK_SRC}
       alt={alt}
       width={200}
       height={48}
       className={className}
-      priority={priority}
-      unoptimized
+      decoding="async"
+      fetchPriority={priority ? "high" : "auto"}
     />
   );
 }

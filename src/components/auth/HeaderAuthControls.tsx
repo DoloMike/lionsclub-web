@@ -9,7 +9,6 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { useSignOut } from "@/components/auth/useSignOut";
 
 function readMetaString(
@@ -204,18 +203,6 @@ export function HeaderAuthControls() {
 
   if (!hasSupabase) {
     return null;
-  }
-
-  if (auth.status === "loading") {
-    return (
-      <div
-        className="flex shrink-0 items-center"
-        aria-busy="true"
-        aria-label="Loading account"
-      >
-        <Skeleton className="h-9 w-[11rem] max-w-[min(100vw-6rem,16rem)] shrink-0 rounded-full shadow-sm ring-1 ring-border/50" />
-      </div>
-    );
   }
 
   const session = auth.session;
