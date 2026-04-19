@@ -114,6 +114,22 @@ body {
   }
 }
 
+/*
+ * iOS Safari auto-zooms into any form field whose computed font-size is
+ * below 16px on focus, and rarely lets the user un-zoom cleanly afterward.
+ * Our inputs use `text-sm` (14px) for visual density on desktop, so on
+ * touch devices we bump them to 16px to defeat the zoom. Targeting
+ * `hover: none` + `pointer: coarse` covers phones and tablets without
+ * affecting desktop / laptop trackpads.
+ */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Shimmer skeleton (used by `Skeleton`); respects reduced-motion via the rule above. */
 @keyframes skeleton-shimmer {
   100% {
