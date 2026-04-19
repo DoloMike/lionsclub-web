@@ -1,13 +1,10 @@
-import { HeaderAuthControls } from "@/components/auth/HeaderAuthControls";
+import { HeaderAuthIsland } from "@/components/HeaderAuthIsland";
 import { HeaderBrandLink } from "@/components/HeaderBrandLink";
 import { LionsLogo } from "@/components/LionsLogo";
 import { MainNavLinks } from "@/components/MainNavLinks";
-import { MobileNav } from "@/components/MobileNav";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import type { SessionProfile } from "@/lib/auth/session-profile";
 import { site } from "@/lib/site";
 
-export function Header({ session }: { session: SessionProfile | null }) {
+export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 shadow-[inset_0_2px_0_0_rgba(235,183,0,0.28)] backdrop-blur supports-[backdrop-filter]:bg-background/80 dark:shadow-none">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6 lg:px-8">
@@ -34,13 +31,7 @@ export function Header({ session }: { session: SessionProfile | null }) {
         >
           <MainNavLinks />
         </nav>
-        <div className="flex min-w-0 shrink-0 items-center justify-end gap-3">
-          <div className="hidden md:block">
-            <ThemeToggle />
-          </div>
-          <HeaderAuthControls session={session} />
-          <MobileNav session={session} />
-        </div>
+        <HeaderAuthIsland />
       </div>
     </header>
   );

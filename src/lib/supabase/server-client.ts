@@ -34,8 +34,9 @@ export async function createSupabaseServerClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      // v0.10 passes cache-control headers as the second arg.
-      setAll(cookiesToSet, _headers) {
+      // v0.10 passes cache-control headers as the second arg (no response in RSC).
+      setAll(cookiesToSet, headers) {
+        void headers;
         try {
           for (const { name, value, options } of cookiesToSet) {
             cookieStore.set(name, value, options);

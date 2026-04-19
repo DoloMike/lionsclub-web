@@ -158,7 +158,7 @@ const getCachedOpenFundraiserRows = unstable_cache(
     return rows as Row[];
   },
   ["fundraiser-banner-open-events"],
-  { revalidate: 300 }
+  { revalidate: 300, tags: ["fundraiser-banner"] }
 );
 
 export async function getFundraiserBannerSegments(
@@ -197,4 +197,17 @@ export async function getFundraiserBannerSegments(
   if (ordering.length > 0) out.push(buildOrderingSegment(ordering));
   if (postDeadline.length > 0) out.push(buildPostDeadlineSegment(postDeadline));
   return out;
+}
+
+/** Cached anonymous banner — keeps the root layout static-friendly between revalidations. */
+const getCachedPublicFundraiserBannerSegmentsInner = unstable_cache(
+  async () => getFundraiserBannerSegments(null),
+  ["fundraiser-banner-public"],
+  { revalidate: 60, tags: ["fundraiser-banner"] }
+);
+
+export async function getCachedPublicFundraiserBannerSegments(): Promise<
+  FundraiserBannerSegment[]
+> {
+  return getCachedPublicFundraiserBannerSegmentsInner();
 }

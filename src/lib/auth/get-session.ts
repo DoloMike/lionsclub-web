@@ -1,11 +1,12 @@
 import "server-only";
+import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { SessionProfile } from "@/lib/auth/session-profile";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 
 export type { SessionProfile };
 
-export async function getSessionProfile(): Promise<SessionProfile | null> {
+export const getSessionProfile = cache(async (): Promise<SessionProfile | null> => {
   if (!isSupabaseConfigured()) {
     return null;
   }
@@ -23,7 +24,7 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
     .maybeSingle();
 
   return { user, role: profile?.role ?? "guest" };
-}
+});
 
 export async function getSessionUser() {
   if (!isSupabaseConfigured()) {

@@ -1,6 +1,40 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+
+const fetchPaidChickenEventIds = unstable_cache(
+  async (userIdKey: string, emailKey: string): Promise<string[]> => {
+    const admin = getSupabaseAdmin();
+    const ids = new Set<string>();
+
+    if (userIdKey) {
+      const { data } = await admin
+        .from("chicken_orders")
+        .select("event_id")
+        .eq("status", "paid")
+        .eq("user_id", userIdKey);
+      for (const row of data ?? []) {
+        if (row.event_id) ids.add(row.event_id);
+      }
+    }
+
+    if (emailKey) {
+      const { data } = await admin
+        .from("chicken_orders")
+        .select("event_id")
+        .eq("status", "paid")
+        .eq("customer_email", emailKey);
+      for (const row of data ?? []) {
+        if (row.event_id) ids.add(row.event_id);
+      }
+    }
+
+    return [...ids].sort();
+  },
+  ["paid-chicken-event-ids"],
+  { revalidate: 60 }
+);
 
 /** Paid orders for this user (by `user_id` or `customer_email`) — for banner suppression. */
 export async function getPaidChickenOrderEventIdsForUser(
@@ -11,31 +45,9 @@ export async function getPaidChickenOrderEventIdsForUser(
     return new Set();
   }
 
-  const admin = getSupabaseAdmin();
-  const ids = new Set<string>();
+  const userIdKey = userId ?? "";
+  const emailKey = email?.trim().toLowerCase() ?? "";
 
-  if (userId) {
-    const { data } = await admin
-      .from("chicken_orders")
-      .select("event_id")
-      .eq("status", "paid")
-      .eq("user_id", userId);
-    for (const row of data ?? []) {
-      if (row.event_id) ids.add(row.event_id);
-    }
-  }
-
-  if (email) {
-    const normalized = email.trim().toLowerCase();
-    const { data } = await admin
-      .from("chicken_orders")
-      .select("event_id")
-      .eq("status", "paid")
-      .eq("customer_email", normalized);
-    for (const row of data ?? []) {
-      if (row.event_id) ids.add(row.event_id);
-    }
-  }
-
-  return ids;
+  const ids = await fetchPaidChickenEventIds(userIdKey, emailKey);
+  return new Set(ids);
 }

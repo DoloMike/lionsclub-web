@@ -36,7 +36,6 @@ export function AdminNavLinks() {
             href={l.href}
             className={adminNavClass(active)}
             aria-current={active ? "page" : undefined}
-            prefetch={false}
           >
             {l.label}
           </Link>

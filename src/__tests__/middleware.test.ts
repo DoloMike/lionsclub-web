@@ -25,10 +25,20 @@ describe("middleware", () => {
     expect(res.status).toBe(200);
   });
 
-  it("refreshes session when Supabase is configured", async () => {
-    const req = new NextRequest("https://example.com/about");
+  it("refreshes session when a Supabase auth cookie is present", async () => {
+    const req = new NextRequest("https://example.com/about", {
+      headers: { cookie: "sb-test-auth-token=1" },
+    });
     const res = await middleware(req);
     expect(res.status).toBe(200);
     expect(getUser).toHaveBeenCalled();
+  });
+
+  it("skips getUser when no Supabase auth cookie", async () => {
+    getUser.mockClear();
+    const req = new NextRequest("https://example.com/about");
+    const res = await middleware(req);
+    expect(res.status).toBe(200);
+    expect(getUser).not.toHaveBeenCalled();
   });
 });

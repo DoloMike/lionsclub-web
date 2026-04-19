@@ -6,7 +6,6 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 /**
  * Shared Google OAuth redirect used by header + mobile drawer sign-in buttons.
- * GSI / One Tap script stays in `HeaderAuthControls` (single mount).
  */
 export function useGoogleOAuthSignIn() {
   const [pending, setPending] = useState(false);

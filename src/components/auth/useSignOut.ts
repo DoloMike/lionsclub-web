@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { startTransition, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { env } from "@/lib/env";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
@@ -8,8 +8,11 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 /**
  * Shared client-side sign-out hook.
  *
- * Signs out Supabase in the browser, POSTs to /auth/signout to clear server
- * cookies, navigates to /, and refreshes the router.
+ * POST /auth/signout first so session cookies are cleared in one same-origin
+ * round trip. A global `signOut()` on the browser client would also hit
+ * Supabase remotely — doing that before the POST made sign-out feel slow.
+ * We finish with `signOut({ scope: "local" })` only to reset in-memory client
+ * state without another network call.
  */
 export function useSignOut() {
   const router = useRouter();
@@ -20,14 +23,21 @@ export function useSignOut() {
     if (!hasSupabase) return;
     setPending(true);
     try {
+      try {
+        await fetch("/auth/signout", {
+          method: "POST",
+          credentials: "include",
+          keepalive: true,
+        });
+      } catch {
+        // Offline / aborted — still wipe local client state below.
+      }
       const supabase = createBrowserSupabaseClient();
-      await supabase.auth.signOut();
-      await fetch("/auth/signout", {
-        method: "POST",
-        credentials: "include",
+      await supabase.auth.signOut({ scope: "local" });
+      startTransition(() => {
+        router.replace("/");
+        router.refresh();
       });
-      router.push("/");
-      router.refresh();
     } finally {
       setPending(false);
     }

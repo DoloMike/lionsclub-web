@@ -4,6 +4,11 @@ import { vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+/** Real `unstable_cache` needs Next incremental cache; in Vitest run the fetcher directly. */
+vi.mock("next/cache", () => ({
+  unstable_cache: <T extends (...args: never[]) => unknown>(fn: T) => fn,
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     children,

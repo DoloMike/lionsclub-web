@@ -6,8 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
 import { useSignOut } from "@/components/auth/useSignOut";
-import type { SessionProfile } from "@/lib/auth/session-profile";
+import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
 import { isAdminRole, isChapterMember } from "@/lib/auth/roles";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { env } from "@/lib/env";
 import { isNavHrefActive, mainNav, mobileNavLinkClassName } from "@/lib/nav";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -18,12 +19,14 @@ function getFocusable(panel: HTMLElement): HTMLElement[] {
   );
 }
 
-export function MobileNav({ session }: { session: SessionProfile | null }) {
+export function MobileNav() {
   const pathname = usePathname() ?? "";
+  const auth = useSessionProfileState();
   const [open, setOpen] = useState(false);
   const { signOut, signOutPending } = useSignOut();
   const { pending: googlePending, signIn } = useGoogleOAuthSignIn();
   const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
+  const session = auth.status === "ready" ? auth.session : null;
   const admin = session ? isAdminRole(session.role) : false;
   const chapterMember = session ? isChapterMember(session.role) : false;
 
@@ -165,10 +168,21 @@ export function MobileNav({ session }: { session: SessionProfile | null }) {
                   Appearance
                 </p>
                 <div className="mt-2">
-                  <ThemeToggle menuAlign="start" />
+                  <ThemeToggle />
                 </div>
               </div>
-              {session && hasSupabase ? (
+              {auth.status === "loading" && hasSupabase ? (
+                <div aria-busy="true" aria-label="Loading account">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Account
+                  </p>
+                  <div className="mt-2 space-y-2">
+                    <Skeleton className="h-10 w-full rounded-md" />
+                    <Skeleton className="h-10 w-3/4 rounded-md" />
+                  </div>
+                </div>
+              ) : null}
+              {auth.status === "ready" && session && hasSupabase ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Account
@@ -216,8 +230,8 @@ export function MobileNav({ session }: { session: SessionProfile | null }) {
                         className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-foreground hover:bg-muted disabled:opacity-50"
                         disabled={signOutPending}
                         onClick={() => {
-                          void signOut();
                           setOpen(false);
+                          void signOut();
                         }}
                       >
                         {signOutPending ? "Signing out…" : "Sign out"}
@@ -226,7 +240,7 @@ export function MobileNav({ session }: { session: SessionProfile | null }) {
                   </ul>
                 </div>
               ) : null}
-              {!session && hasSupabase ? (
+              {auth.status === "ready" && !session && hasSupabase ? (
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Account

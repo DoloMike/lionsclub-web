@@ -57,4 +57,30 @@ describe("createBrowserSupabaseClient", () => {
     };
     expect(opts.cookieOptions.domain).toBeUndefined();
   });
+
+  it("on localhost tab, uses Supabase URL even when NEXT_PUBLIC_APP_URL is production", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://club.example.org");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://abc123.supabase.co");
+    vi.resetModules();
+    const prev = globalThis.window;
+    try {
+      Object.assign(globalThis, {
+        window: { location: { hostname: "localhost" } },
+      });
+      const { createBrowserClient } = await import("@supabase/ssr");
+      vi.mocked(createBrowserClient).mockClear();
+      const { createBrowserSupabaseClient } = await import(
+        "@/lib/supabase/browser"
+      );
+      createBrowserSupabaseClient();
+      const url = vi.mocked(createBrowserClient).mock.calls[0]?.[0];
+      expect(url).toBe("https://abc123.supabase.co");
+    } finally {
+      if (prev === undefined) {
+        Reflect.deleteProperty(globalThis, "window");
+      } else {
+        Object.assign(globalThis, { window: prev });
+      }
+    }
+  });
 });

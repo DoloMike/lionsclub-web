@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { SessionProfile } from "@/lib/auth/session-profile";
 import { isAdminRole, isChapterMember, roleLabel } from "@/lib/auth/roles";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useGoogleOAuthSignIn } from "@/components/auth/useGoogleOAuthSignIn";
+import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useSignOut } from "@/components/auth/useSignOut";
 
 function readMetaString(
@@ -151,7 +151,7 @@ function LoggedInAccountMenu({
               Appearance
             </p>
             <div className="mt-2">
-              <ThemeToggle menuAlign="end" />
+              <ThemeToggle />
             </div>
           </div>
           <div className="py-1">
@@ -194,35 +194,31 @@ function LoggedInAccountMenu({
   );
 }
 
-export function HeaderAuthControls({
-  session,
-}: {
-  session: SessionProfile | null;
-}) {
-  const router = useRouter();
+export function HeaderAuthControls() {
+  const auth = useSessionProfileState();
   const { pending: oauthPending, signIn: signInWithGoogleOAuth } =
     useGoogleOAuthSignIn();
   const { signOut, signOutPending } = useSignOut();
 
   const hasSupabase = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
-  useEffect(() => {
-    if (!hasSupabase) return;
-    // Lazy-import browser client only when needed
-    import("@/lib/supabase/browser").then(({ createBrowserSupabaseClient }) => {
-      const supabase = createBrowserSupabaseClient();
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(() => {
-        router.refresh();
-      });
-      return () => subscription.unsubscribe();
-    });
-  }, [hasSupabase, router]);
-
   if (!hasSupabase) {
     return null;
   }
+
+  if (auth.status === "loading") {
+    return (
+      <div
+        className="flex shrink-0 items-center"
+        aria-busy="true"
+        aria-label="Loading account"
+      >
+        <Skeleton className="h-9 w-[11rem] max-w-[min(100vw-6rem,16rem)] shrink-0 rounded-full shadow-sm ring-1 ring-border/50" />
+      </div>
+    );
+  }
+
+  const session = auth.session;
 
   if (session) {
     return (

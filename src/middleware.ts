@@ -23,6 +23,14 @@ export async function middleware(request: NextRequest) {
     return hostname === "localhost" ? undefined : hostname;
   })();
 
+  const mayHaveSession = request.cookies
+    .getAll()
+    .some(({ name }) => name.startsWith("sb-"));
+
+  if (!mayHaveSession) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(url, anonKey, {
     cookieOptions: {
       path: "/",
@@ -54,6 +62,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Skip auth refresh for static assets, health checks, and SEO files — fewer
+    // edge invocations and no Supabase chatter on probes or crawlers.
+    "/((?!_next/static|_next/image|favicon.ico|api/health|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

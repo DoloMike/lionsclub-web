@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { assertAdmin } from "@/lib/auth/assert-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server-client";
@@ -203,6 +203,7 @@ export async function toggleFundraiserOrderOpen(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
+  updateTag("fundraiser-banner");
   revalidatePath("/", "layout");
   revalidatePath("/fundraising");
   revalidatePath("/fundraising/order");
@@ -266,6 +267,7 @@ export async function updateFundraiserEvent(formData: FormData) {
     .eq("id", id);
 
   if (error) throw error;
+  updateTag("fundraiser-banner");
   revalidatePath("/", "layout");
   revalidatePath("/fundraising");
   revalidatePath("/fundraising/order");
@@ -339,6 +341,7 @@ export async function addFundraiserEvent(formData: FormData) {
     throw new Error("Could not create fundraiser — try a different title.");
   }
 
+  updateTag("fundraiser-banner");
   revalidatePath("/", "layout");
   revalidatePath("/fundraising");
   revalidatePath("/fundraising/order");
