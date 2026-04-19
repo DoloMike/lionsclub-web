@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import type { User } from "@supabase/supabase-js";
 import { Container } from "@/components/Container";
 import { FundraisingTrustCallout } from "@/components/fundraising/FundraisingTrustCallout";
+import { useSessionProfileState } from "@/components/auth/SessionProfileProvider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { fieldClassName } from "@/components/ui/field";
@@ -50,6 +52,28 @@ function isValidEmail(s: string): boolean {
   return t.length > 0 && EMAIL_RE.test(t);
 }
 
+function readMetaString(
+  meta: User["user_metadata"],
+  key: string,
+): string | undefined {
+  const v = meta?.[key];
+  return typeof v === "string" && v.trim() ? v.trim() : undefined;
+}
+
+/**
+ * Pull a sensible display name out of Supabase user metadata. OAuth providers
+ * (Google) populate `full_name` / `name`; password sign-ups typically have
+ * neither. We avoid falling back to the email local-part here so we never
+ * silently fill the Name field with something the user didn't choose to share.
+ */
+function nameFromUser(user: User): string {
+  return (
+    readMetaString(user.user_metadata, "full_name") ??
+    readMetaString(user.user_metadata, "name") ??
+    ""
+  );
+}
+
 function pickupLabel(e: FundraiserEventRow): string | null {
   if (e.pickup_starts_at) {
     return (
@@ -69,10 +93,18 @@ export function ChickenOrderClient({
   events: FundraiserEventRow[];
   stripeReady: boolean;
 }) {
+  // Pre-fill identity fields from the signed-in Supabase session when present.
+  // Lazy initializers run once on mount so subsequent session refreshes (admin
+  // role recheck, token refresh) never clobber what the user has typed.
+  const auth = useSessionProfileState();
+  const sessionUser = auth.session?.user ?? null;
+  const sessionEmail = sessionUser?.email ?? "";
+  const sessionName = sessionUser ? nameFromUser(sessionUser) : "";
+
   const [eventId, setEventId] = useState(events[0]?.id ?? "");
   const [quantity, setQuantity] = useState(1);
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerName, setCustomerName] = useState(() => sessionName);
+  const [customerEmail, setCustomerEmail] = useState(() => sessionEmail);
   const [customerPhone, setCustomerPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -346,13 +378,38 @@ export function ChickenOrderClient({
             onBlur={() => setEmailTouched(true)}
             disabled={loading}
             aria-invalid={showEmailError}
-            aria-describedby={showEmailError ? "email-error" : undefined}
+            aria-describedby={
+              showEmailError
+                ? "email-error"
+                : sessionEmail && customerEmail === sessionEmail
+                  ? "email-prefilled"
+                  : undefined
+            }
             className={fieldClassName("mt-1")}
             autoComplete="email"
           />
           {showEmailError ? (
             <p id="email-error" className="mt-1 text-xs text-destructive" role="alert">
               Enter a valid email address.
+            </p>
+          ) : sessionEmail && customerEmail === sessionEmail ? (
+            <p
+              id="email-prefilled"
+              className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"
+            >
+              <svg
+                className="h-3 w-3 shrink-0 text-primary"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.704 5.296a1 1 0 010 1.408l-7.5 7.5a1 1 0 01-1.408 0l-3.5-3.5a1 1 0 111.408-1.408L8.5 12.092l6.796-6.796a1 1 0 011.408 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>From your account — change if you need to.</span>
             </p>
           ) : null}
         </div>
