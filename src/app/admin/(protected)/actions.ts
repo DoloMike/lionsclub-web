@@ -3,7 +3,21 @@
 import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { assertAdmin } from "@/lib/auth/assert-admin";
+import { createSupabaseServerClient } from "@/lib/supabase/server-client";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+
+/**
+ * Server-side sign out for the admin login page's "forbidden" recovery
+ * affordance (non-admin user reached /admin). Clears the SSR session cookies
+ * and redirects to the home page. Authenticated UI surfaces use the shared
+ * client-side `useSignOut` hook instead so the Supabase browser client state
+ * is also wiped.
+ */
+export async function signOut() {
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+  redirect("/");
+}
 
 export async function updateMeetingSchedule(formData: FormData) {
   await assertAdmin();
