@@ -277,19 +277,9 @@ export function ChickenOrderClient({
           <label className="block text-sm font-medium text-foreground">
             Quantity
           </label>
-          <input
-            type="number"
-            min={1}
-            max={maxQ}
+          <select
             value={quantity}
-            onChange={(e) => {
-              const n = parseInt(e.target.value, 10);
-              if (!Number.isFinite(n)) {
-                setQuantity(1);
-                return;
-              }
-              setQuantity(Math.min(maxQ, Math.max(1, n)));
-            }}
+            onChange={(e) => setQuantity(Number(e.target.value))}
             onBlur={() => setQuantityTouched(true)}
             disabled={loading}
             aria-invalid={showQuantityError}
@@ -301,14 +291,20 @@ export function ChickenOrderClient({
                 ? "border-destructive ring-1 ring-destructive/40"
                 : "border-border"
             }`}
-          />
+          >
+            {Array.from({ length: maxQ }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
           {showQuantityError ? (
             <p
               id="quantity-error"
               className="mt-1 text-xs text-destructive"
               role="alert"
             >
-              Enter a quantity from 1 to {maxQ}.
+              Choose a quantity from 1 to {maxQ}.
             </p>
           ) : (
             <p className="mt-1 text-xs text-muted-foreground">
