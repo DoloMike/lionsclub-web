@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { SessionProfile } from "@/lib/auth/session-profile";
@@ -195,42 +194,16 @@ function LoggedInAccountMenu({
   );
 }
 
-type GsiCallback = (resp: { credential?: string }) => void;
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: GsiCallback;
-            auto_select?: boolean;
-            cancel_on_tap_outside?: boolean;
-            itp_support?: boolean;
-            /** false avoids FedCM AbortError noise in dev (Strict Mode / cooldown). */
-            use_fedcm_for_prompt?: boolean;
-          }) => void;
-          prompt: () => void;
-          cancel: () => void;
-        };
-      };
-    };
-  }
-}
-
 export function HeaderAuthControls({
   session,
 }: {
   session: SessionProfile | null;
 }) {
   const router = useRouter();
-  const [gsiLoaded, setGsiLoaded] = useState(false);
   const { pending: oauthPending, signIn: signInWithGoogleOAuth } =
     useGoogleOAuthSignIn();
   const [signOutPending, setSignOutPending] = useState(false);
 
-  const clientId = env.googleClientId;
   const hasSupabase = Boolean(env.supabase.url && env.supabase.anonKey);
 
   useEffect(() => {
@@ -243,53 +216,6 @@ export function HeaderAuthControls({
     });
     return () => subscription.unsubscribe();
   }, [hasSupabase, router]);
-
-  useEffect(() => {
-    if (!gsiLoaded || !clientId || session) return;
-    const g = window.google;
-    if (!g?.accounts?.id) return;
-
-    let cancelled = false;
-
-    g.accounts.id.initialize({
-      client_id: clientId,
-      callback: async (credentialResponse) => {
-        if (cancelled) return;
-        const token = credentialResponse.credential;
-        if (!token) return;
-        const supabase = createBrowserSupabaseClient();
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: "google",
-          token,
-        });
-        if (error) {
-          console.error(error);
-          return;
-        }
-        router.refresh();
-      },
-      auto_select: false,
-      cancel_on_tap_outside: true,
-      itp_support: true,
-      // Chrome (incl. Android): FedCM is the supported path for One Tap; improves odds the
-      // prompt appears. Dev keeps this off to reduce Strict Mode / FedCM AbortError noise.
-      use_fedcm_for_prompt: false,
-    });
-
-    const promptTimer = window.setTimeout(() => {
-      if (!cancelled) g.accounts.id.prompt();
-    }, 0);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(promptTimer);
-      try {
-        g.accounts.id.cancel();
-      } catch {
-        /* ignore */
-      }
-    };
-  }, [gsiLoaded, clientId, session, router]);
 
   const signOut = useCallback(async () => {
     if (!hasSupabase) return;
@@ -324,13 +250,6 @@ export function HeaderAuthControls({
 
   return (
     <div className="flex items-center gap-2">
-      {clientId ? (
-        <Script
-          src="https://accounts.google.com/gsi/client"
-          strategy="afterInteractive"
-          onLoad={() => setGsiLoaded(true)}
-        />
-      ) : null}
       <div className="hidden lg:flex lg:items-center">
         <GoogleSignInButton
           variant="compact"

@@ -40,9 +40,8 @@ export function LoginPanel({
         </p>
       ) : null}
       <p className="mb-6 text-sm text-muted-foreground">
-        Use your Google account. You can also use{" "}
-        <strong>Sign in with Google</strong> in the site header (including
-        One Tap when it appears).
+        Use your Google account. You can also use <strong>Sign in with Google</strong>{" "}
+        in the site header.
       </p>
       <GoogleSignInButton
         variant="full"
