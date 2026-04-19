@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { env, isStripeConfigured } from "@/lib/env";
 import {
@@ -138,8 +139,30 @@ export async function POST(request: Request) {
   const base = origin.replace(/\/$/, "");
 
   const idemDay = new Date().toISOString().slice(0, 10);
+  // Stripe rejects an idempotency key reused with *different* params as a
+  // 400 `idempotency_error`. The original key only included event/email/qty
+  // /day, so a buyer who submitted, then edited their notes / name / phone
+  // and clicked again would surface a 500 to the UI. Fold every variable
+  // input into a content hash so "same body" still de-dupes a double-click
+  // but "different body" produces a fresh key and a fresh Stripe session.
+  // \x1f (US, "unit separator") is non-printable so it can't appear inside
+  // the inputs themselves and create a hash collision via field re-aliasing.
+  const contentHash = createHash("sha256")
+    .update(
+      [
+        event.id,
+        String(quantity),
+        String(unitPrice),
+        customerEmail,
+        customerPhone,
+        customerName,
+        notes,
+      ].join("\x1f")
+    )
+    .digest("hex")
+    .slice(0, 16);
   const idempotencyKeyRaw =
-    `chk_${event.id}_${customerEmail}_${quantity}_${idemDay}`.replace(
+    `chk_${event.id}_${customerEmail}_${quantity}_${idemDay}_${contentHash}`.replace(
       /\s+/g,
       ""
     );

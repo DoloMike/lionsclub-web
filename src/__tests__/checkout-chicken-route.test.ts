@@ -112,4 +112,89 @@ describe("POST /api/checkout/chicken", () => {
     expect(res.status).toBe(400);
     expect(sessionsCreate).not.toHaveBeenCalled();
   });
+
+  it("derives the idempotency key from request content so edited form fields don't 500", async () => {
+    // Two requests, identical event/email/qty/day but different `notes` —
+    // historically these collided on the same Stripe idempotency key and
+    // returned `idempotency_error` 500s. The key must now diverge.
+    function eventStub() {
+      return {
+        id: "evt_1",
+        title: "Spring 2026 Chicken Cook",
+        order_open: true,
+        event_date: "2099-05-01",
+        orders_close_date: "2099-04-25",
+        orders_close_at: null,
+        price_cents_per_unit: 1300,
+        max_units_per_order: 10,
+        inventory_units: null,
+      };
+    }
+
+    mockEventLookup(eventStub());
+    sessionsCreate.mockResolvedValueOnce({ url: "https://stripe.example/a" });
+    await POST(
+      buildRequest({
+        eventId: "evt_1",
+        quantity: 1,
+        customerEmail: "buyer@example.com",
+        notes: "first try",
+      })
+    );
+
+    mockEventLookup(eventStub());
+    sessionsCreate.mockResolvedValueOnce({ url: "https://stripe.example/b" });
+    await POST(
+      buildRequest({
+        eventId: "evt_1",
+        quantity: 1,
+        customerEmail: "buyer@example.com",
+        notes: "edited after a typo",
+      })
+    );
+
+    expect(sessionsCreate).toHaveBeenCalledTimes(2);
+    const firstKey = (sessionsCreate.mock.calls[0]?.[1] as { idempotencyKey: string }).idempotencyKey;
+    const secondKey = (sessionsCreate.mock.calls[1]?.[1] as { idempotencyKey: string }).idempotencyKey;
+    expect(firstKey).not.toBe(secondKey);
+    // Same shape so historical greps in logs still work.
+    expect(firstKey).toMatch(/^chk_evt_1_buyer@example\.com_1_/);
+    expect(secondKey).toMatch(/^chk_evt_1_buyer@example\.com_1_/);
+  });
+
+  it("returns the same idempotency key when the request body is identical (true double-click)", async () => {
+    function eventStub() {
+      return {
+        id: "evt_1",
+        title: "Spring 2026 Chicken Cook",
+        order_open: true,
+        event_date: "2099-05-01",
+        orders_close_date: "2099-04-25",
+        orders_close_at: null,
+        price_cents_per_unit: 1300,
+        max_units_per_order: 10,
+        inventory_units: null,
+      };
+    }
+    const body = {
+      eventId: "evt_1",
+      quantity: 2,
+      customerEmail: "buyer@example.com",
+      customerName: "Buyer",
+      customerPhone: "555-555-0100",
+      notes: "leave at front door",
+    };
+
+    mockEventLookup(eventStub());
+    sessionsCreate.mockResolvedValueOnce({ url: "https://stripe.example/a" });
+    await POST(buildRequest(body));
+
+    mockEventLookup(eventStub());
+    sessionsCreate.mockResolvedValueOnce({ url: "https://stripe.example/b" });
+    await POST(buildRequest(body));
+
+    const firstKey = (sessionsCreate.mock.calls[0]?.[1] as { idempotencyKey: string }).idempotencyKey;
+    const secondKey = (sessionsCreate.mock.calls[1]?.[1] as { idempotencyKey: string }).idempotencyKey;
+    expect(firstKey).toBe(secondKey);
+  });
 });
