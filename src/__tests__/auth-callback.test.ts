@@ -23,7 +23,7 @@ describe("GET /auth/callback", () => {
       "https://localhost/auth/callback?error=access_denied"
     );
     const res = await GET(req);
-    expect(res.status).toBe(307);
+    expect(res.status).toBe(303);
     expect(res.headers.get("location")).toContain("/login?error=oauth");
   });
 
@@ -41,7 +41,7 @@ describe("GET /auth/callback", () => {
     );
     const res = await GET(req);
     expect(exchangeCodeForSession).toHaveBeenCalledWith("abc123");
-    expect(res.status).toBe(307);
+    expect(res.status).toBe(303);
     const loc = res.headers.get("location")!;
     expect(loc).toContain("/events");
     expect(loc).not.toContain("code=");

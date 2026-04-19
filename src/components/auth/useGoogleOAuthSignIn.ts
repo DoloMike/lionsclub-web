@@ -20,7 +20,7 @@ export function useGoogleOAuthSignIn() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${origin}/auth/callback`,
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         },
       });
       if (error) console.error(error);

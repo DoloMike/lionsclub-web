@@ -30,12 +30,11 @@ export async function GET(request: NextRequest) {
     : requestUrl.origin;
 
   if (oauthError) {
-    return NextResponse.redirect(`${origin}/login?error=oauth`);
+    return NextResponse.redirect(`${origin}/login?error=oauth`, 303);
   }
 
-  // Redirect target — no code param, session will be in cookies
   const redirectUrl = new URL(`${origin}${safeNext}`);
-  const response = NextResponse.redirect(redirectUrl);
+  const response = NextResponse.redirect(redirectUrl, 303);
 
   if (!code || !env.supabase.url || !env.supabase.anonKey) {
     return response;
@@ -63,7 +62,7 @@ export async function GET(request: NextRequest) {
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=oauth`);
+    return NextResponse.redirect(`${origin}/login?error=oauth`, 303);
   }
 
   return response;
