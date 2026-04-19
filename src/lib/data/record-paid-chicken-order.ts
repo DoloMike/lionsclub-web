@@ -16,12 +16,17 @@ export type RecordPaidOrderResult =
  * the Stripe webhook (source of truth) and the return page (fallback if the
  * webhook hasn't landed or isn't configured locally).
  *
- * Invalidates the `chicken-orders` cache tag so the next render of the
- * site-wide banner suppresses this event for the buyer.
+ * `revalidate` controls whether to invalidate the `chicken-orders` cache tag.
+ * The webhook (a Route Handler) sets it to true. The return page (a Server
+ * Component) sets it to false: Next 16 throws `"updateTag … used during
+ * render which is unsupported"` from render contexts, and the webhook will
+ * invalidate the tag itself when it lands.
  */
 export async function recordPaidChickenOrder(
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  options: { revalidate?: boolean } = {}
 ): Promise<RecordPaidOrderResult> {
+  const { revalidate = true } = options;
   const m = session.metadata ?? {};
   const eventId = typeof m.event_id === "string" ? m.event_id : "";
   const quantity = parseInt(m.quantity ?? "0", 10);
@@ -74,6 +79,8 @@ export async function recordPaidChickenOrder(
     return { status: "error", error: error.message };
   }
 
-  updateTag("chicken-orders");
+  if (revalidate) {
+    updateTag("chicken-orders");
+  }
   return { status: "inserted" };
 }

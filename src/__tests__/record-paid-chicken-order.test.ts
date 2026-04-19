@@ -95,6 +95,16 @@ describe("recordPaidChickenOrder", () => {
     expect(updateTag).not.toHaveBeenCalled();
   });
 
+  it("skips updateTag when revalidate=false (used from render contexts)", async () => {
+    maybeSingle.mockResolvedValueOnce({ data: null });
+    insert.mockResolvedValueOnce({ error: null });
+    const result = await recordPaidChickenOrder(buildSession(), {
+      revalidate: false,
+    });
+    expect(result).toEqual({ status: "inserted" });
+    expect(updateTag).not.toHaveBeenCalled();
+  });
+
   it("surfaces other insert errors", async () => {
     maybeSingle.mockResolvedValueOnce({ data: null });
     insert.mockResolvedValueOnce({

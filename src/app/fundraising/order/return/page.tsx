@@ -55,8 +55,10 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
       // Webhook is the durable writer; this call is a fallback for the case
       // where the customer's success URL beats the webhook (or webhook is
       // unconfigured locally). The shared helper is idempotent via the
-      // unique `stripe_checkout_session_id` index.
-      await recordPaidChickenOrder(session);
+      // unique `stripe_checkout_session_id` index. Skip cache invalidation
+      // here — Next 16 forbids `updateTag` during render and the webhook
+      // will invalidate the tag once it lands.
+      await recordPaidChickenOrder(session, { revalidate: false });
 
       const m = session.metadata ?? {};
       const eventId = m.event_id;
@@ -69,7 +71,14 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
         if (ev) eventSummary = ev as EventSummary;
       }
     }
-  } catch {
+  } catch (err) {
+    // Without this log, "verify_failed" is a black hole — both webhook
+    // failures and Supabase/Stripe errors look identical to the user.
+    console.error(
+      "[chicken-order/return] failed to verify checkout session",
+      { sessionId },
+      err,
+    );
     outcome = "verify_failed";
   }
 
