@@ -224,15 +224,14 @@ export function ChickenOrderClient({
             disabled={loading}
             className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:opacity-60"
           >
-            {events.map((e) => {
-              const ob = orderByLabel(e);
-              return (
-                <option key={e.id} value={e.id}>
-                  {e.title}
-                  {ob ? ` — order by ${ob}` : ""}
-                </option>
-              );
-            })}
+            {/* Title only — long deadline strings here force iOS to widen the
+                native select box past the viewport, breaking mobile layout.
+                "Order by" + pickup details render below once a value is picked. */}
+            {events.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.title}
+              </option>
+            ))}
           </select>
         </div>
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProfileProvider } from "@/components/auth/SessionProfileProvider";
@@ -31,6 +31,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
 });
+
+/**
+ * Allow pinch-to-zoom IN (accessibility) but prevent zoom OUT below the
+ * initial scale. iOS Safari persists zoom level across navigations within a
+ * tab, so a single accidental pinch-out leaves every subsequent page rendered
+ * at half-width until the user double-taps to reset. `minimumScale: 1` keeps
+ * the user inside the design without disabling zoom-in.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {
