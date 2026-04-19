@@ -532,7 +532,7 @@ The dark theme is serviceable, but it feels more like a token inversion than a f
 - Purpose: authenticate chapter admins.
 - What is working well:
   - Separate admin entry point is clear.
-  - Google and email/password options are both available.
+  - Google sign-in is the single, intentional path (email/password was removed — there is no signup flow and the only admin uses Google).
   - Forbidden-state messaging is useful.
 - UX issues:
   - Form does not feel especially secure or trustworthy despite being an admin surface.

@@ -224,19 +224,19 @@ Each section: **purpose**, **key message**, **CTA**.
 
 The project standardizes on **Supabase** (`@supabase/supabase-js`, `@supabase/ssr`, clients under `src/lib/supabase/*`, `env` in `src/lib/env.ts`). **Supabase Auth** is the identity provider:
 
-- **Today:** **Google OAuth** for **chapter admins** (`/admin/login`, `/auth/callback`, cookie refresh in `proxy.ts`).
-- **Planned / optional:** **Email + password** for members or officers; **Google One Tap** via `signInWithIdToken` when product requirements settle.
+- **Today:** **Google OAuth** for **chapter admins** (`/admin/login`, `/auth/callback`, cookie refresh in `proxy.ts`). Email/password is intentionally **not** offered — there is no signup flow and the single admin uses Google.
+- **Planned / optional:** **Google One Tap** via `signInWithIdToken` when product requirements settle.
 
 **Repository conventions to preserve**
 
 - Browser-only anon client for user-scoped calls under **RLS**.
 - **`getSupabaseAdmin()`** (service role) **only** on the server for privileged tasks — never import `@/lib/supabase/admin` in Client Components (enforced via `server-only`).
 
-### Google One Tap + email/password coexistence
+### Google One Tap coexistence
 
-- **Account linking**: Prefer a single Supabase user. If the same person signs in with Google and later email/password, ensure **verified email** alignment or use Supabase’s linking flows to avoid duplicates (exact UX depends on Supabase project settings—validate during Phase 2).
+- **Account linking**: If email/password is ever re-introduced, prefer a single Supabase user — ensure **verified email** alignment or use Supabase’s linking flows to avoid duplicates.
 - **UX**: Show One Tap on **sign-in** and **checkout** surfaces, not globally on every page (noise + consent).
-- **Fallback**: Always expose **Continue with Google (button)** and **email/password** forms for browsers blocking One Tap.
+- **Fallback**: Always expose **Continue with Google (button)** for browsers blocking One Tap.
 
 ### Role model
 
@@ -401,7 +401,7 @@ src/
 
 ### Integrations / services
 
-- **Supabase Auth** (Google + email/password).
+- **Supabase Auth** (Google OAuth only — no email/password flow is exposed in the UI).
 - **Email**: Supabase Auth emails + Resend/SendGrid later for order receipts (decision).
 - **Payments:** **Stripe Checkout** is integrated for chicken orders when `STRIPE_SECRET_KEY` is configured; extend webhooks and reconciliation as needed.
 - **Analytics**: privacy-conscious Plausible or GA4—cookie banner if required.
@@ -428,7 +428,7 @@ Phases below are the **original roadmap**; see **[status-and-next.md](status-and
 
 ### Phase 2 — Auth + roles
 
-- **Scope**: Supabase Auth providers (Google + email/password), profile table, role + verification flags, member layout shell, protected routes, One Tap evaluation behind feature flag.
+- **Scope**: Supabase Auth provider (Google OAuth), profile table, role + verification flags, member layout shell, protected routes, One Tap evaluation behind feature flag.
 - **Dependencies**: Supabase project configuration (OAuth client IDs), email templates, privacy policy.
 - **Success criteria**: test accounts can sign in/out; RLS prevents cross-user data reads; verification flow works end-to-end.
 - **Status (Apr 2026):** **Partial** — **Google admin** sign-in + `profiles` + RLS patterns exist; **club member** sign-in, verification UX, and One Tap are **not** finished as originally scoped.
