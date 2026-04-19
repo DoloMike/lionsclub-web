@@ -10,7 +10,9 @@ function cookieDomain(): string | undefined {
 }
 
 export async function POST(request: NextRequest) {
-  const url = env.supabase.internalUrl || env.supabase.url;
+  // Use the public URL so sign-out clears the same auth cookie names that the
+  // browser client, callback route, and SSR readers use.
+  const url = env.supabase.url;
   const anonKey = env.supabase.anonKey;
 
   if (!env.supabase.url || !anonKey) {
