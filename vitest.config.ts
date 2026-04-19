@@ -13,7 +13,9 @@ export default defineConfig({
   test: {
     environment: "node",
     setupFiles: ["./vitest.setup.ts"],
-    exclude: ["node_modules", ".next", ".worktrees"],
+    // `e2e/` holds manual Playwright tests (`*.e2e.ts`) — keep them out of
+    // the Vitest run that CI executes.
+    exclude: ["node_modules", ".next", ".worktrees", "e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "json-summary"],

@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
     "build/**",
     "coverage/**",
     "next-env.d.ts",
+    // Manual Playwright suite — has its own runtime/types and is excluded
+    // from CI lint to avoid pulling Playwright into the lint dep graph.
+    "e2e/**",
+    "playwright.config.ts",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

@@ -13,6 +13,11 @@
 # testing
 /coverage
 
+# playwright (manual e2e — see e2e/README.md)
+/playwright-report
+/test-results
+/.playwright
+
 # next.js
 /.next/
 /out/
