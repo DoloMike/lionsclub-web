@@ -10,7 +10,6 @@ import {
 } from "react";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { SessionProfile } from "@/lib/auth/session-profile";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 /** Always `ready` — initial session comes from the server layout (no header skeleton flash). */
 export type SessionProfileStatus = {
@@ -41,31 +40,58 @@ export function SessionProfileProvider({
 }) {
   const [state, setState] = useState<SessionProfileStatus>(initial);
 
+  // Only authenticated users need the live `onAuthStateChange` listener
+  // (cross-tab sign-out, role refresh after admin promote, etc.). Guests
+  // become signed-in via a full-page OAuth round trip — the next server
+  // render reads the new cookie and seeds `initial` with the session, at
+  // which point this effect re-runs and attaches the listener.
+  //
+  // Keeping the effect short-circuited for guests means the entire Supabase
+  // browser client (`@supabase/ssr` + `@supabase/supabase-js`, ~30 KB gz)
+  // stays out of the guest bundle as a lazy chunk loaded on first need.
+  const hasSession = initial.session !== null;
+
   useEffect(() => {
-    const supabase = createBrowserSupabaseClient();
+    if (!hasSession) return;
 
-    const syncFromUser = async (user: User | null) => {
-      if (!user) {
-        setState({ status: "ready", session: null });
-        return;
-      }
-      try {
-        const session = await profileForUser(supabase, user);
-        setState({ status: "ready", session });
-      } catch {
-        setState({ status: "ready", session: { user, role: "guest" } });
-      }
+    let cancelled = false;
+    let subscription: { unsubscribe: () => void } | undefined;
+
+    void (async () => {
+      const { createBrowserSupabaseClient } = await import(
+        "@/lib/supabase/browser"
+      );
+      if (cancelled) return;
+      const supabase = createBrowserSupabaseClient();
+
+      const syncFromUser = async (user: User | null) => {
+        if (!user) {
+          setState({ status: "ready", session: null });
+          return;
+        }
+        try {
+          const session = await profileForUser(supabase, user);
+          setState({ status: "ready", session });
+        } catch {
+          setState({ status: "ready", session: { user, role: "guest" } });
+        }
+      };
+
+      const {
+        data: { subscription: sub },
+      } = supabase.auth.onAuthStateChange((event, nextSession) => {
+        if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
+        void syncFromUser(nextSession?.user ?? null);
+      });
+      subscription = sub;
+      if (cancelled) sub.unsubscribe();
+    })();
+
+    return () => {
+      cancelled = true;
+      subscription?.unsubscribe();
     };
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") return;
-      void syncFromUser(nextSession?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  }, [hasSession]);
 
   const value = useMemo(() => state, [state]);
 

@@ -229,7 +229,9 @@ export function HeaderAuthControls() {
             void signInWithGoogleOAuth();
           }}
         >
-          Sign in with Google
+          {/* Tight breakpoint (lg → xl) competes with 6 nav items + brand;
+              keep the G-mark visible and trim the label until xl. */}
+          Sign in<span className="hidden xl:inline"> with Google</span>
         </GoogleSignInButton>
       </div>
     </div>

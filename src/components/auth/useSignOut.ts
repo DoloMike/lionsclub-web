@@ -3,7 +3,6 @@
 import { startTransition, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { env } from "@/lib/env";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 /**
  * Shared client-side sign-out hook.
@@ -13,6 +12,10 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
  * Supabase remotely — doing that before the POST made sign-out feel slow.
  * We finish with `signOut({ scope: "local" })` only to reset in-memory client
  * state without another network call.
+ *
+ * The Supabase browser client is dynamically imported so guest pageviews
+ * don't pull `@supabase/ssr` + `@supabase/supabase-js` into the shared bundle.
+ * The chunk loads when an authenticated user actually clicks Sign out.
  */
 export function useSignOut() {
   const router = useRouter();
@@ -32,6 +35,9 @@ export function useSignOut() {
       } catch {
         // Offline / aborted — still wipe local client state below.
       }
+      const { createBrowserSupabaseClient } = await import(
+        "@/lib/supabase/browser"
+      );
       const supabase = createBrowserSupabaseClient();
       await supabase.auth.signOut({ scope: "local" });
       startTransition(() => {
