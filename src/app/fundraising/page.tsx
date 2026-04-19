@@ -121,6 +121,7 @@ export default async function FundraisingPage() {
                     <p className="mt-2">
                       <Link
                         href="/fundraising/order"
+                        prefetch={false}
                         className="font-medium text-primary underline-offset-4 hover:underline"
                       >
                         Order chickens for this cook
@@ -179,7 +180,11 @@ export default async function FundraisingPage() {
         ) : null}
 
         <p>
-          <Link href="/fundraising/order" className="font-medium text-primary">
+          <Link
+            href="/fundraising/order"
+            prefetch={false}
+            className="font-medium text-primary"
+          >
             Order chicken
           </Link>{" "}
           — checkout collects payment; the club records your order only after it
