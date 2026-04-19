@@ -19,12 +19,12 @@ export default defineConfig({
       reporter: ["text", "html", "json-summary"],
       reportsDirectory: "./coverage",
       /**
-       * Denominator = core logic + middleware + key routes + components under test.
+       * Denominator = core logic + proxy + key routes + components under test.
        * Listing all app components drops totals because most UI files are not yet covered.
        */
       include: [
         "src/lib/**/*.ts",
-        "src/middleware.ts",
+        "src/proxy.ts",
         "src/app/sitemap.ts",
         "src/app/robots.ts",
         "src/app/api/health/route.ts",

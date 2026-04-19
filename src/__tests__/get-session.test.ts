@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 const getUser = vi.fn();
-const maybeSingle = vi.fn();
+const getAll = vi.fn(() => [{ name: "sb-test-auth-token", value: "1" }]);
+
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ getAll })),
+}));
 
 vi.mock("@/lib/env", () => ({
   isSupabaseConfigured: vi.fn(() => true),
@@ -10,14 +14,12 @@ vi.mock("@/lib/env", () => ({
 vi.mock("@/lib/supabase/server-client", () => ({
   createSupabaseServerClient: vi.fn(async () => ({
     auth: { getUser },
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          maybeSingle,
-        }),
-      }),
-    }),
   })),
+}));
+
+const getCachedProfileRole = vi.fn();
+vi.mock("@/lib/data/profile", () => ({
+  getCachedProfileRole: (id: string) => getCachedProfileRole(id),
 }));
 
 import {
@@ -34,10 +36,21 @@ describe("get-session", () => {
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
   });
 
+  it("getSessionProfile returns null when no sb-* cookie", async () => {
+    getAll.mockReturnValueOnce([{ name: "other", value: "x" }]);
+    await expect(getSessionProfile()).resolves.toBeNull();
+    expect(getUser).not.toHaveBeenCalled();
+  });
+
   it("getSessionUser returns null when Supabase not configured", async () => {
     vi.mocked(isSupabaseConfigured).mockReturnValueOnce(false);
     await expect(getSessionUser()).resolves.toBeNull();
     vi.mocked(isSupabaseConfigured).mockReturnValue(true);
+  });
+
+  it("getSessionUser returns null when no sb-* cookie", async () => {
+    getAll.mockReturnValueOnce([]);
+    await expect(getSessionUser()).resolves.toBeNull();
   });
 
   it("getSessionProfile returns null when no user", async () => {
@@ -45,13 +58,14 @@ describe("get-session", () => {
     await expect(getSessionProfile()).resolves.toBeNull();
   });
 
-  it("getSessionProfile defaults role to guest", async () => {
+  it("getSessionProfile resolves role from cached profile lookup", async () => {
     getUser.mockResolvedValueOnce({
       data: { user: { id: "u1", email: "a@b.co" } },
     });
-    maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+    getCachedProfileRole.mockResolvedValueOnce("guest");
     const s = await getSessionProfile();
     expect(s?.role).toBe("guest");
+    expect(getCachedProfileRole).toHaveBeenCalledWith("u1");
   });
 
   it("getSessionUser returns null when no user", async () => {
@@ -63,10 +77,10 @@ describe("get-session", () => {
     getUser.mockResolvedValue({
       data: { user: { id: "u1" } },
     });
-    maybeSingle.mockResolvedValueOnce({ data: { role: "member" }, error: null });
+    getCachedProfileRole.mockResolvedValueOnce("member");
     await expect(getSessionAdmin()).resolves.toBeNull();
 
-    maybeSingle.mockResolvedValueOnce({ data: { role: "admin" }, error: null });
+    getCachedProfileRole.mockResolvedValueOnce("admin");
     const admin = await getSessionAdmin();
     expect(admin?.id).toBe("u1");
   });

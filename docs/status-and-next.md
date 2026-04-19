@@ -11,7 +11,7 @@ Single place for **what’s done** in this repo and **what’s next**. Deeper pr
 - **Public site:** Core routes — home, about, service, events, fundraising, chicken order + Stripe return, membership, contact, privacy, terms, login; skip link, header/footer, mobile nav, active nav states, theme toggle.
 - **Content & trust:** Chapter copy, fundraiser trust callouts, expanded privacy/terms, footer trust block, warm section styling, home hero + community card, campaign banner polish, empty/success patterns where implemented.
 - **Supabase:** Migrations for `site_settings`, officers, chapter events, social links, `profiles` (roles: `guest` / `member` / `admin`), `fundraiser_events`, `chicken_orders`. Local CLI defaults to API **55421** (see `supabase/config.toml`).
-- **Auth:** Google sign-in for admins (`/admin/login`, `/auth/callback`); session refresh via `middleware.ts` (see Next.js notes on `middleware` → `proxy` when you upgrade). Account menu: guests see “Become a Member”; members/admins don’t.
+- **Auth:** Google sign-in for admins (`/admin/login`, `/auth/callback`); session refresh via `proxy.ts` (Next 16 file-convention proxy, formerly `middleware.ts`). Account menu: guests see “Become a Member”; members/admins don’t.
 - **Admin:** Dashboard, meeting schedule, social links, officers, events, fundraisers (CRUD + ordering toggle). Per-fundraiser **stats** (`/admin/fundraiser/[eventId]/stats`) and **CSV export** (`GET /api/admin/fundraiser/[eventId]/orders-csv`).
 - **Chicken fundraising:** Guest Stripe Checkout (`STRIPE_SECRET_KEY`); order row written after paid return; deadlines enforced in app; inventory checks at checkout when capped.
 

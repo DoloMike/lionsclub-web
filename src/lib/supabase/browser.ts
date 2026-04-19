@@ -68,3 +68,8 @@ export function createBrowserSupabaseClient(): SupabaseClient {
   });
   return _browserClient;
 }
+
+/** Test-only: clear the cached singleton between tests that don't `vi.resetModules()`. */
+export function __resetBrowserSupabaseClient(): void {
+  _browserClient = null;
+}

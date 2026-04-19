@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Container } from "@/components/Container";
 import { isStripeConfigured } from "@/lib/env";
+import { recordPaidChickenOrder } from "@/lib/data/record-paid-chicken-order";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { site } from "@/lib/site";
@@ -48,42 +49,11 @@ export default async function ChickenOrderReturnPage({ searchParams }: Props) {
     if (session.payment_status !== "paid") {
       outcome = "not_paid";
     } else {
-      const admin = getSupabaseAdmin();
-      const { data: existing } = await admin
-        .from("chicken_orders")
-        .select("id")
-        .eq("stripe_checkout_session_id", sessionId)
-        .maybeSingle();
-
-      if (!existing) {
-        const m = session.metadata ?? {};
-        const eventId = m.event_id;
-        const quantity = parseInt(m.quantity ?? "0", 10);
-        const unitPrice = parseInt(m.unit_price_cents ?? "0", 10);
-        const totalCents = parseInt(m.total_cents ?? "0", 10);
-
-        if (
-          eventId &&
-          quantity > 0 &&
-          unitPrice > 0 &&
-          totalCents > 0 &&
-          m.customer_email
-        ) {
-          await admin.from("chicken_orders").insert({
-            event_id: eventId,
-            quantity,
-            unit_price_cents: unitPrice,
-            total_cents: totalCents,
-            customer_email: m.customer_email,
-            customer_phone: m.customer_phone || null,
-            customer_name: m.customer_name || null,
-            notes: m.notes || null,
-            user_id: null,
-            status: "paid",
-            stripe_checkout_session_id: sessionId,
-          });
-        }
-      }
+      // Webhook is the durable writer; this call is a fallback for the case
+      // where the customer's success URL beats the webhook (or webhook is
+      // unconfigured locally). The shared helper is idempotent via the
+      // unique `stripe_checkout_session_id` index.
+      await recordPaidChickenOrder(session);
 
       const m = session.metadata ?? {};
       const eventId = m.event_id;

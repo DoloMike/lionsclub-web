@@ -224,7 +224,7 @@ Each section: **purpose**, **key message**, **CTA**.
 
 The project standardizes on **Supabase** (`@supabase/supabase-js`, `@supabase/ssr`, clients under `src/lib/supabase/*`, `env` in `src/lib/env.ts`). **Supabase Auth** is the identity provider:
 
-- **Today:** **Google OAuth** for **chapter admins** (`/admin/login`, `/auth/callback`, cookie refresh in `middleware.ts`).
+- **Today:** **Google OAuth** for **chapter admins** (`/admin/login`, `/auth/callback`, cookie refresh in `proxy.ts`).
 - **Planned / optional:** **Email + password** for members or officers; **Google One Tap** via `signInWithIdToken` when product requirements settle.
 
 **Repository conventions to preserve**
@@ -273,7 +273,7 @@ Suggested flow:
 
 - **RLS everywhere** on user-specific and order tables; **no** service role from the browser.
 - **CSRF**: prefer Server Actions / Next Route Handlers with same-site cookies for mutations.
-- **Rate limit** contact and order endpoints (edge middleware or upstream WAF).
+- **Rate limit** contact and order endpoints (edge proxy or upstream WAF).
 - **Secrets**: keep `SUPABASE_SERVICE_ROLE_KEY` server-only (already documented in `README.md`).
 - **Staging**: continue using `NEXT_PUBLIC_NOINDEX=true` pattern already wired in `next.config.ts`, `robots.ts`, and `layout.tsx`.
 
@@ -377,7 +377,7 @@ src/
     supabase/              # browser, server-client, admin, public-server
     auth/                  # getSessionAdmin, assert-admin, …
     data/                  # chapter content, fundraiser queries
-  middleware.ts            # Supabase cookie refresh (watch Next.js middleware → proxy migration notes)
+  proxy.ts                 # Supabase cookie refresh (Next 16 file-convention proxy)
 ```
 
 **Still optional / future:** route groups `(public)/`, `(member)/member/...`, dedicated `components/ui/` barrel, extra `styles/` split if CSS grows.
@@ -489,7 +489,7 @@ Phases below are the **original roadmap**; see **[status-and-next.md](status-and
 - `src/app/fundraising/order/*`, `src/app/admin/(protected)/fundraiser/*`, `src/app/api/**` (Stripe)
 - `supabase/migrations/*` (RLS, functions)
 - `src/lib/data/fundraiser.ts`, `src/components/admin/*`
-- `src/middleware.ts` (session) — watch Next.js guidance on `middleware` vs `proxy`
+- `src/proxy.ts` (session) — Next 16 file-convention proxy (renamed from `middleware.ts`)
 
 ---
 

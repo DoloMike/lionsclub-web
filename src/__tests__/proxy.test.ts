@@ -9,9 +9,9 @@ vi.mock("@supabase/ssr", () => ({
   })),
 }));
 
-import { middleware } from "@/middleware";
+import { proxy } from "@/proxy";
 
-describe("middleware", () => {
+describe("proxy", () => {
   afterEach(() => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "test-anon-key");
@@ -21,7 +21,7 @@ describe("middleware", () => {
   it("passes through when Supabase URL is missing", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
     const req = new NextRequest("https://example.com/about");
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(200);
   });
 
@@ -29,7 +29,7 @@ describe("middleware", () => {
     const req = new NextRequest("https://example.com/about", {
       headers: { cookie: "sb-test-auth-token=1" },
     });
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(200);
     expect(getSession).toHaveBeenCalled();
   });
@@ -37,7 +37,7 @@ describe("middleware", () => {
   it("skips getSession when no Supabase auth cookie", async () => {
     getSession.mockClear();
     const req = new NextRequest("https://example.com/about");
-    const res = await middleware(req);
+    const res = await proxy(req);
     expect(res.status).toBe(200);
     expect(getSession).not.toHaveBeenCalled();
   });

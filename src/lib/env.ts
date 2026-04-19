@@ -14,6 +14,12 @@ export const env = {
   /** Optional — chicken checkout is disabled until set */
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY ?? "",
+    /**
+     * `whsec_…` from Stripe. When set, the webhook is the source of truth for
+     * paid orders; the `/fundraising/order/return` page falls back to inserting
+     * the row only if the webhook hasn't landed (or isn't configured).
+     */
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
   },
   /** Same Web client ID as Google OAuth / One Tap (public) */
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
@@ -32,6 +38,10 @@ export function isSupabaseConfigured(): boolean {
 
 export function isStripeConfigured(): boolean {
   return Boolean(env.stripe.secretKey);
+}
+
+export function isStripeWebhookConfigured(): boolean {
+  return Boolean(env.stripe.secretKey && env.stripe.webhookSecret);
 }
 
 export function isGoogleOneTapConfigured(): boolean {

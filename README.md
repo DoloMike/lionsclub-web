@@ -7,7 +7,7 @@ Lions Club web app — **Next.js + TypeScript + Tailwind + Supabase + Bun + Dock
 - **Next.js 16** (App Router)
 - **TypeScript**
 - **Tailwind CSS v4**
-- **Supabase** (`@supabase/ssr` + `@supabase/supabase-js` — browser client, cookie session refresh in `middleware.ts`, anon on server where needed, service role for trusted writes)
+- **Supabase** (`@supabase/ssr` + `@supabase/supabase-js` — browser client, cookie session refresh in `proxy.ts`, anon on server where needed, service role for trusted writes)
 - **Stripe** (optional — chicken cook checkout when `STRIPE_SECRET_KEY` is set)
 - **Vitest** (API / config / utility tests)
 - **Docker + Nginx** (production-style deploy)
@@ -69,7 +69,7 @@ See **`.env.example`** for a template; copy it to **`.env.local`** for local sec
 - **Trusted server-only writes / admin:** `import { getSupabaseAdmin } from "@/lib/supabase/admin"` (service role)  
   The admin module uses `import "server-only"` so it cannot be bundled into client code.
 
-`src/middleware.ts` refreshes the Supabase auth cookie on each matched request (see Next.js notes if migrating from `middleware` to `proxy` in a future release).
+`src/proxy.ts` (Next 16 file-convention proxy, formerly `middleware.ts`) refreshes the Supabase auth cookie on each matched request.
 
 Use RLS policies for user-facing data; reserve the service role for trusted server-side work (admin queries, Stripe webhooks, migrations, etc.).
 
@@ -174,7 +174,7 @@ src/
   app/              # App Router: public pages, /admin/*, /auth/callback, /fundraising/order/*
   components/       # Shared UI (Header, Footer, Landing, admin/*, LionsLogo, SocialIcon, ExternalLink, …)
   lib/              # env.ts, site.ts, supabase/*, auth/*, data/*, leaves-site.ts, …
-  middleware.ts     # Supabase session cookie refresh (see Next.js `middleware` / `proxy` docs)
+  proxy.ts          # Supabase session cookie refresh (Next 16 proxy file convention)
 docs/
   status-and-next.md             # Concise shipped vs next (incl. prod deploy)
   lewisport-lions-site-plan.md   # Full product spec, IA, phased plan
