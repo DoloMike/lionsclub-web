@@ -1,4 +1,4 @@
-name: Deploy
+name: Migrate and Deploy
 
 on:
   push:
@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  migrate-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,6 +66,16 @@ jobs:
             fi
             sleep 5
           done
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Run migrations against prod DB
+        env:
+          PGSSLMODE: disable
+        run: supabase db push --db-url ${{ secrets.SUPABASE_DB_URL }} --yes
 
       - name: Trigger Coolify deploy
         run: |
