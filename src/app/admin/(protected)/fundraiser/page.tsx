@@ -5,6 +5,11 @@ import {
   updateFundraiserEvent,
 } from "../actions";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { env } from "@/lib/env";
+import {
+  isBeforePickupDay,
+  isOrderingDeadlinePassed,
+} from "@/lib/fundraiser-dates";
 
 function formatUsd(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -52,11 +57,46 @@ export default async function AdminFundraiserPage() {
                     slug: {ev.slug}
                   </p>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {ev.order_open ? (
-                      <span className="font-medium text-success">Ordering open</span>
-                    ) : (
-                      <span className="font-medium text-warning">Ordering closed</span>
-                    )}
+                    {(() => {
+                      const tz = env.siteTimezone;
+                      const nowMs = Date.now();
+                      const effectiveOpen =
+                        ev.order_open &&
+                        ev.event_date &&
+                        isBeforePickupDay(ev.event_date, tz) &&
+                        !isOrderingDeadlinePassed(
+                          { orders_close_at: null, orders_close_date: ev.orders_close_date },
+                          nowMs,
+                          tz
+                        );
+                      if (effectiveOpen) {
+                        return (
+                          <span className="font-medium text-success">
+                            Ordering open
+                          </span>
+                        );
+                      }
+                      if (
+                        ev.order_open &&
+                        ev.orders_close_date &&
+                        isOrderingDeadlinePassed(
+                          { orders_close_at: null, orders_close_date: ev.orders_close_date },
+                          nowMs,
+                          tz
+                        )
+                      ) {
+                        return (
+                          <span className="font-medium text-destructive">
+                            Ordering open — deadline passed
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="font-medium text-warning">
+                          Ordering closed
+                        </span>
+                      );
+                    })()}
                     {" · "}
                     {formatUsd(ev.price_cents_per_unit)} each · max{" "}
                     {ev.max_units_per_order} / order
