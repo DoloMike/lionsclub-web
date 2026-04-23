@@ -24,7 +24,9 @@ export function HeaderBrandLink({
       onClick={(e) => {
         if (pathname !== "/") return;
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        // Direct coordinates (not behavior:"smooth") — smooth scroll can be
+        // interrupted and stop short of 0 when user scrolls during animation.
+        window.scrollTo(0, 0);
       }}
     >
       {children}

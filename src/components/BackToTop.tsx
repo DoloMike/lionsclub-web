@@ -36,7 +36,9 @@ export function BackToTop() {
   }, [enabled]);
 
   const goTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Use direct coordinates (not behavior:"smooth") — smooth scroll can be
+    // interrupted and stop short of 0 when the user scrolls during animation.
+    window.scrollTo(0, 0);
   }, []);
 
   if (!enabled || !visible) return null;
