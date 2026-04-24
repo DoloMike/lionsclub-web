@@ -135,7 +135,7 @@ export function Landing() {
             id="mission"
             className="text-2xl font-bold tracking-tight text-foreground"
           >
-            Mission &amp; impact
+            Mission &amp; Impact
           </h2>
           <p className="mt-4 max-w-3xl text-lg leading-relaxed text-muted-foreground">
             We improve health and opportunity through local programs you can see

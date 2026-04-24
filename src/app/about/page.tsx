@@ -17,7 +17,7 @@ export default async function AboutPage() {
   return (
     <>
       <PageHeader
-        title="About our chapter"
+        title="About Our Chapter"
         description={`${site.name} is a volunteer service organization in ${site.location}. We’re chartered under ${site.district} and part of the global Lions network.`}
       />
       <Prose>
