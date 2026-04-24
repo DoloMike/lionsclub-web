@@ -11,7 +11,7 @@ const heroAddressMapsUrl = googleMapsSearchUrl(site.address.displayLine);
 
 const programs = [
   {
-    title: "Vision & hearing",
+    title: "Vision & Hearing",
     body: "Eyeglass collection, cleaning, and distribution; help with exams and glasses; connections to Kentucky Lions Eye Foundation and surgery where eligible.",
   },
   {
@@ -19,7 +19,7 @@ const programs = [
     body: "Vision Van for adults and KidSight for young children (about 5 months through 5 years).",
   },
   {
-    title: "Youth & education",
+    title: "Youth & Education",
     body: "Scholarships for Hancock County High School seniors and support for local youth programs.",
   },
   {

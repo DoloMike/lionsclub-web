@@ -15,7 +15,7 @@ export default function ServicePage() {
   return (
     <>
       <PageHeader
-        title="What we do"
+        title="What We Do"
         description="Programs align with our chapter’s public project list—local first, with ties to Kentucky Lions Eye Foundation and broader Lions initiatives."
       />
       <Prose>

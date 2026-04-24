@@ -86,7 +86,7 @@ export default async function FundraisingPage() {
         </Container>
       </div>
       <Prose>
-        <h2>Chicken cooks</h2>
+        <h2>Chicken Cooks</h2>
         {acceptingOrders.length > 0 ? (
           <>
             <h3 className="!mt-6 text-base font-semibold text-foreground">
@@ -181,7 +181,7 @@ export default async function FundraisingPage() {
                 <>
                   <ButtonLink href="/contact">Contact the club</ButtonLink>
                   <ButtonLink href="/membership" variant="secondary">
-                    Membership info
+                    Membership Info
                   </ButtonLink>
                 </>
               }
@@ -200,7 +200,7 @@ export default async function FundraisingPage() {
           succeeds. For other arrangements,{" "}
           <Link href="/contact">contact the club</Link>.
         </p>
-        <h2>Other campaigns</h2>
+        <h2>Other Campaigns</h2>
         <p>
           Additional fundraisers will be listed here with clear instructions
           and any terms of sale.

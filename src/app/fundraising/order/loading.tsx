@@ -5,7 +5,7 @@ import { Skeleton, SkeletonText } from "@/components/ui/Skeleton";
 export default function FundraisingOrderLoading() {
   return (
     <>
-      <PageHeader title="Order chicken" />
+      <PageHeader title="Order Chicken" />
       <Container className="py-8">
         <div
           className="mx-auto max-w-xl space-y-6"

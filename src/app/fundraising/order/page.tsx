@@ -22,7 +22,7 @@ export default async function ChickenOrderPage({ searchParams }: Props) {
 
   return (
     <>
-      <PageHeader title="Order chicken" />
+      <PageHeader title="Order Chicken" />
       {sp.canceled ? (
         <div
           className="border-b border-warning-border bg-warning-bg px-4 py-3 text-center text-sm text-warning-foreground"

@@ -24,15 +24,15 @@ export default function PrivacyPage() {
           we need to run the site and serve the community.
         </p>
 
-        <h2>What we collect</h2>
-        <h3>Browsing the public site</h3>
+        <h2>What We Collect</h2>
+        <h3>Browsing the Public Site</h3>
         <p>
           You can read most pages without an account. Standard server and
           hosting logs may include your IP address, browser type, and pages
           viewed—used for security and troubleshooting, not sold to advertisers.
         </p>
 
-        <h3>Accounts (sign-in)</h3>
+        <h3>Accounts (Sign-In)</h3>
         <p>
           If you use <strong>Sign in with Google</strong> or email sign-in,
           authentication is handled by our identity provider (Supabase Auth).
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           that message body on this site unless we add a contact form later.
         </p>
 
-        <h3>Fundraising orders (chicken cooks)</h3>
+        <h3>Fundraising Orders (Chicken Cooks)</h3>
         <p>
           Online orders are completed through <strong>Stripe Checkout</strong>.
           Stripe processes payment card data; we do not store full card numbers
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
           to the Stripe session so we can reconcile payments.
         </p>
 
-        <h2>Why we use data</h2>
+        <h2>Why We Use Data</h2>
         <ul>
           <li>Operate the website and chapter information.</li>
           <li>Authenticate members and chapter administrators.</li>
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
           only to provide those services. We do not sell personal information.
         </p>
 
-        <h2>Your choices</h2>
+        <h2>Your Choices</h2>
         <ul>
           <li>
             You may request access, correction, or deletion of account-related

@@ -13,7 +13,7 @@ export default function TermsPage() {
   return (
     <>
       <PageHeader
-        title="Terms of use"
+        title="Terms of Use"
         description="General rules for using this site, plus fundraiser ordering terms."
       />
       <Prose>

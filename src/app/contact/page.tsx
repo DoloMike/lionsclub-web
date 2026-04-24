@@ -28,12 +28,12 @@ export default function ContactPage() {
           We don’t publish a club phone number — please email us and we’ll get
           back to you.
         </p>
-        <h2>Online form</h2>
+        <h2>Online Form</h2>
         <p>
           A contact form with spam protection is planned for a later phase. For
           now, please use email.
         </p>
-        <h2>Nonprofit meeting space</h2>
+        <h2>Nonprofit Meeting Space</h2>
         <p>
           Ask about free meeting space for qualifying nonprofits (limited days
           per year)—include your organization name and preferred dates.
