@@ -137,7 +137,7 @@ export default async function FundraiserStatsPage({ params }: Props) {
       </ul>
 
       <div className="mt-10">
-        <h2 className="text-lg font-semibold text-foreground">All orders</h2>
+        <h2 className="text-lg font-semibold text-foreground">All Orders</h2>
         {orders.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
             No orders recorded yet for this fundraiser.

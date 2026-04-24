@@ -58,7 +58,7 @@ export default async function AdminChapterEventsPage() {
       )}
 
       <form action={addChapterEvent} className="mt-10 max-w-md space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Add event</h2>
+        <h2 className="text-lg font-semibold text-foreground">Add Event</h2>
         <div>
           <label htmlFor="title" className="block text-sm font-medium">
             Title

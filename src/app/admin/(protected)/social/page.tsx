@@ -106,7 +106,7 @@ export default async function AdminSocialPage() {
       </ul>
 
       <form action={addSocialLink} className="mt-10 max-w-xl space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Add link</h2>
+        <h2 className="text-lg font-semibold text-foreground">Add Link</h2>
         <div>
           <label htmlFor="new-label" className="block text-sm font-medium">
             Label

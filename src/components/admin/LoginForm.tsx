@@ -34,7 +34,7 @@ export function LoginForm({
         </div>
       ) : null}
       <Card padding="xl">
-        <h1 className="text-xl font-semibold text-foreground">Admin sign in</h1>
+        <h1 className="text-xl font-semibold text-foreground">Admin Sign In</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Sign in with your Google account.
         </p>

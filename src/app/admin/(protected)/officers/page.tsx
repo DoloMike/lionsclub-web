@@ -46,7 +46,7 @@ export default async function AdminOfficersPage() {
       </ul>
 
       <form action={addOfficer} className="mt-10 max-w-md space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Add officer</h2>
+        <h2 className="text-lg font-semibold text-foreground">Add Officer</h2>
         <div>
           <label htmlFor="name" className="block text-sm font-medium">
             Name

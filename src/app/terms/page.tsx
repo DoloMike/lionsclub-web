@@ -37,7 +37,7 @@ export default function TermsPage() {
           permission.
         </p>
 
-        <h2>Fundraiser orders (chicken cooks)</h2>
+        <h2>Fundraiser Orders (Chicken Cooks)</h2>
         <p>
           When online ordering is open, you may place an order through{" "}
           <strong>Stripe Checkout</strong>. By paying, you agree to:
@@ -71,7 +71,7 @@ export default function TermsPage() {
           charge was made in error, contact us with your Stripe receipt.
         </p>
 
-        <h2>Limitation of liability</h2>
+        <h2>Limitation of Liability</h2>
         <p>
           To the extent permitted by law, the chapter and volunteers are not
           liable for indirect damages arising from use of this site. The site is

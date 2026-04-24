@@ -52,7 +52,7 @@ export default async function EventsPage() {
             ))}
           </ul>
         )}
-        <h2>Recurring touchpoints</h2>
+        <h2>Recurring Touchpoints</h2>
         <ul>
           <li>Christmas parade morning pancake breakfast</li>
           <li>Santa float — Lewisport and Hawesville parades</li>

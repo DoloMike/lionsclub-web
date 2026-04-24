@@ -22,7 +22,7 @@ export default async function MembershipPage() {
         description="We’re welcoming, practical, and local. Ask questions, visit a meeting, and see if Lions is a fit for you."
       />
       <Prose>
-        <h2>Why join</h2>
+        <h2>Why Join</h2>
         <p>
           You’ll serve alongside neighbors, lead projects that matter here, and
           plug into a global network when it helps—without losing our Hancock
@@ -31,7 +31,7 @@ export default async function MembershipPage() {
         <h2>Meetings</h2>
         <p className="whitespace-pre-wrap">{meetingSchedule}</p>
         <p>{site.meeting.place}</p>
-        <h2>Sign in (optional)</h2>
+        <h2>Sign In (Optional)</h2>
         <p>
           Accounts are <strong>optional</strong> for most of the site. Use{" "}
           <Link href="/login">Sign in</Link> or <strong>Sign in with Google</strong>{" "}
@@ -41,7 +41,7 @@ export default async function MembershipPage() {
           <strong>Admin</strong> access is assigned by the chapter for site
           editors.
         </p>
-        <h2>Next step</h2>
+        <h2>Next Step</h2>
         <p>
           <Link href="/contact">Message the club</Link> to introduce yourself
           or ask for a guest visit.
