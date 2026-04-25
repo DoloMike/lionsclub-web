@@ -77,7 +77,8 @@ export function Landing() {
                 id="hero-heading"
                 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
               >
-                Hey Jared
+                Serving Hancock County as{" "}
+                <span className="text-primary">{site.shortName}</span>
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
                 Vision and hearing programs, youth support, scholarships, and
