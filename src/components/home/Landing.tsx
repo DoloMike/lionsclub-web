@@ -112,11 +112,21 @@ export function Landing() {
                 className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/15 blur-2xl"
                 aria-hidden
               />
-              <Eyebrow>In our community</Eyebrow>
+              <div className="overflow-hidden rounded-2xl border border-primary/15 bg-muted/20 shadow-card">
+                <Image
+                  src="/images/heritage-festival-2026.jpg"
+                  alt="Lions Club volunteers and family gathered around a grill outdoors during a community cookout."
+                  width={800}
+                  height={523}
+                  className="h-full w-full object-cover"
+                  sizes="(min-width: 1024px) 32rem, 100vw"
+                  priority
+                />
+              </div>
+              <Eyebrow className="mt-5">In our community</Eyebrow>
               <p className="mt-3 text-sm font-medium leading-relaxed text-foreground">
-                Meetings and service projects are rooted at{" "}
-                <span className="text-primary">{site.address.venue}</span>—the
-                same address we publish for pickups and chapter gatherings.
+                Meetings, cookouts, and service projects are rooted at{" "}
+                <span className="text-primary">{site.address.venue}</span>.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">
                 <ExternalLink
@@ -141,12 +151,12 @@ export function Landing() {
       <section className="border-b border-border/60 bg-primary/5 py-12" aria-labelledby="heritage-festival-signup-callout">
         <Container>
           <Card padding="xl" ring className="border-primary/20 bg-background/90">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,1fr)] lg:items-center">
-              <div>
-                <Eyebrow tone="primary">{heritageFestivalCallout.eyebrow}</Eyebrow>
+            <Eyebrow tone="primary">{heritageFestivalCallout.eyebrow}</Eyebrow>
+            <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
                 <h2
                   id="heritage-festival-signup-callout"
-                  className="mt-4 text-2xl font-bold tracking-tight text-foreground"
+                  className="text-2xl font-bold tracking-tight text-foreground"
                 >
                   {heritageFestivalCallout.title}
                 </h2>
@@ -154,26 +164,16 @@ export function Landing() {
                   {heritageFestivalCallout.body}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  See the crew in action, then claim a shift and help keep the booth running strong.
+                  See the crew in action at the top of the homepage, then claim a shift and help keep the booth running strong.
                 </p>
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-                  <ButtonLink href={heritageFestivalCallout.href} size="lg">
-                    Sign up for Heritage Festival 2026
-                  </ButtonLink>
-                  <ButtonLink href="/contact" variant="secondary" size="lg">
-                    Ask a question
-                  </ButtonLink>
-                </div>
               </div>
-              <div className="overflow-hidden rounded-2xl border border-primary/15 bg-muted/20 shadow-card">
-                <Image
-                  src="/images/heritage-festival-2026.jpg"
-                  alt="Lions Club volunteers and family gathered around a grill outdoors during a community cookout."
-                  width={800}
-                  height={523}
-                  className="h-full w-full object-cover"
-                  sizes="(min-width: 1024px) 32rem, 100vw"
-                />
+              <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
+                <ButtonLink href={heritageFestivalCallout.href} size="lg">
+                  Sign up for Heritage Festival 2026
+                </ButtonLink>
+                <ButtonLink href="/contact" variant="secondary" size="lg">
+                  Ask a question
+                </ButtonLink>
               </div>
             </div>
           </Card>

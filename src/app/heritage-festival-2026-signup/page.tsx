@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { HeritageFestivalSignupTable } from "@/components/heritage-festival/HeritageFestivalSignupTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
-import { Card } from "@/components/ui/Card";
 import { addHeritageFestivalSignup } from "@/app/heritage-festival-2026-signup/actions";
 import {
   buildEmptyHeritageFestivalSignupSheet,
@@ -48,35 +46,6 @@ export default async function HeritageFestivalSignupPage() {
           </p>
         ) : null}
       </Prose>
-      <div className="mx-auto mt-8 max-w-5xl px-4 sm:px-6 lg:px-8">
-        <Card
-          padding="lg"
-          ring
-          className="overflow-hidden border-primary/15 bg-background/95"
-        >
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:items-center">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-                Heritage Festival booth volunteers
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Join the Heritage Festival booth crew. Pick the day that works for you and add your name below.
-              </p>
-            </div>
-            <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted/20 shadow-card">
-              <Image
-                src="/images/heritage-festival-2026.jpg"
-                alt="Lions Club volunteers and family gathered around a grill outdoors during a community cookout."
-                width={800}
-                height={523}
-                className="h-full w-full object-cover"
-                sizes="(min-width: 1024px) 28rem, 100vw"
-                priority
-              />
-            </div>
-          </div>
-        </Card>
-      </div>
       <div className="mx-auto mt-10 max-w-5xl px-4 pb-16 sm:px-6 lg:px-8">
         <HeritageFestivalSignupTable
           days={days}
