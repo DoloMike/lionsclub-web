@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { ExternalLink } from "@/components/ExternalLink";
@@ -140,26 +141,39 @@ export function Landing() {
       <section className="border-b border-border/60 bg-primary/5 py-12" aria-labelledby="heritage-festival-signup-callout">
         <Container>
           <Card padding="xl" ring className="border-primary/20 bg-background/90">
-            <Eyebrow tone="primary">{heritageFestivalCallout.eyebrow}</Eyebrow>
-            <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="max-w-2xl">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(260px,1fr)] lg:items-center">
+              <div>
+                <Eyebrow tone="primary">{heritageFestivalCallout.eyebrow}</Eyebrow>
                 <h2
                   id="heritage-festival-signup-callout"
-                  className="text-2xl font-bold tracking-tight text-foreground"
+                  className="mt-4 text-2xl font-bold tracking-tight text-foreground"
                 >
                   {heritageFestivalCallout.title}
                 </h2>
                 <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                   {heritageFestivalCallout.body}
                 </p>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  See the crew in action, then claim a shift and help keep the booth running strong.
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
+                  <ButtonLink href={heritageFestivalCallout.href} size="lg">
+                    Sign up for Heritage Festival 2026
+                  </ButtonLink>
+                  <ButtonLink href="/contact" variant="secondary" size="lg">
+                    Ask a question
+                  </ButtonLink>
+                </div>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-                <ButtonLink href={heritageFestivalCallout.href} size="lg">
-                  Sign up for Heritage Festival 2026
-                </ButtonLink>
-                <ButtonLink href="/contact" variant="secondary" size="lg">
-                  Ask a question
-                </ButtonLink>
+              <div className="overflow-hidden rounded-2xl border border-primary/15 bg-muted/20 shadow-card">
+                <Image
+                  src="/images/heritage-festival-2026.jpg"
+                  alt="Lions Club volunteers and family gathered around a grill outdoors during a community cookout."
+                  width={800}
+                  height={523}
+                  className="h-full w-full object-cover"
+                  sizes="(min-width: 1024px) 32rem, 100vw"
+                />
               </div>
             </div>
           </Card>
