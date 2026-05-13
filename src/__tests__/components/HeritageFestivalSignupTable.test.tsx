@@ -20,7 +20,7 @@ describe("HeritageFestivalSignupTable", () => {
     expect(screen.getByText("Thursday, May 28, 2026")).toBeInTheDocument();
     expect(screen.getByText("Friday, May 29, 2026")).toBeInTheDocument();
     expect(screen.getByText("Saturday, May 30, 2026")).toBeInTheDocument();
-    expect(screen.getAllByText(/closes at 5:00 pm/i)).toHaveLength(3);
+    expect(screen.getAllByText(/5:00 pm - close/i)).toHaveLength(3);
     expect(screen.getAllByRole("button", { name: /add your name/i })).toHaveLength(3);
     expect(screen.getByText("Dakota Basham")).toBeInTheDocument();
   });
