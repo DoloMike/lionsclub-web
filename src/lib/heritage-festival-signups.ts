@@ -1,3 +1,5 @@
+export const HERITAGE_FESTIVAL_SIGNUP_CLOSE_TIME_LABEL = "Closes at 5:00 PM";
+
 export const HERITAGE_FESTIVAL_SIGNUP_DAYS = [
   { date: "2026-05-28", label: "Thursday, May 28, 2026" },
   { date: "2026-05-29", label: "Friday, May 29, 2026" },

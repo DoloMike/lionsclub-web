@@ -11,7 +11,7 @@ describe("nav", () => {
     const hrefs = mainNav.map((i) => i.href);
 
     expect(hrefs).toContain("/fundraising");
-    expect(hrefs).toContain("/heritage-festival-2026-signup");
+    expect(hrefs).not.toContain("/heritage-festival-2026-signup");
   });
 
   describe("isNavHrefActive", () => {

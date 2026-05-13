@@ -60,6 +60,14 @@ const impact = [
 const ctaRow =
   "mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto";
 
+const heritageFestivalCallout = {
+  eyebrow: "Volunteer spotlight",
+  title: "Heritage Festival 2026 signup",
+  body:
+    "Help us cover Thursday, Friday, or Saturday at the Heritage Festival. All three days close at 5:00 PM.",
+  href: "/heritage-festival-2026-signup",
+} as const;
+
 export function Landing() {
   return (
     <>
@@ -126,6 +134,35 @@ export function Landing() {
               </Link>
             </Card>
           </div>
+        </Container>
+      </section>
+
+      <section className="border-b border-border/60 bg-primary/5 py-12" aria-labelledby="heritage-festival-signup-callout">
+        <Container>
+          <Card padding="xl" ring className="border-primary/20 bg-background/90">
+            <Eyebrow tone="primary">{heritageFestivalCallout.eyebrow}</Eyebrow>
+            <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-2xl">
+                <h2
+                  id="heritage-festival-signup-callout"
+                  className="text-2xl font-bold tracking-tight text-foreground"
+                >
+                  {heritageFestivalCallout.title}
+                </h2>
+                <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+                  {heritageFestivalCallout.body}
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
+                <ButtonLink href={heritageFestivalCallout.href} size="lg">
+                  Sign up for Heritage Festival 2026
+                </ButtonLink>
+                <ButtonLink href="/contact" variant="secondary" size="lg">
+                  Ask a question
+                </ButtonLink>
+              </div>
+            </div>
+          </Card>
         </Container>
       </section>
 
