@@ -13,6 +13,6 @@ describe("Landing", () => {
     expect(
       screen.getByRole("link", { name: /sign up for heritage festival 2026/i }),
     ).toHaveAttribute("href", "/heritage-festival-2026-signup");
-    expect(screen.getByText(/all three days are 5:00 pm - close/i)).toBeInTheDocument();
+    expect(screen.getByText(/booth setup, festival days, and booth tear down/i)).toBeInTheDocument();
   });
 });

@@ -4,7 +4,6 @@ import { ExternalLink } from "@/components/ExternalLink";
 import { ButtonLink, buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { HERITAGE_FESTIVAL_SIGNUP_CLOSE_TIME_LABEL } from "@/lib/heritage-festival-signups";
 import { googleMapsSearchUrl } from "@/lib/maps-links";
 import { site } from "@/lib/site";
 
@@ -64,7 +63,8 @@ const ctaRow =
 const heritageFestivalCallout = {
   eyebrow: "Volunteer spotlight",
   title: "Heritage Festival 2026 signup",
-  body: `Help us cover Thursday, Friday, or Saturday at the Heritage Festival. All three days are ${HERITAGE_FESTIVAL_SIGNUP_CLOSE_TIME_LABEL}.`,
+  body:
+    "Sign up for booth setup, festival days, and booth tear down so every shift is covered.",
   href: "/heritage-festival-2026-signup",
 } as const;
 

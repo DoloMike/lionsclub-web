@@ -1,8 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import {
-  HERITAGE_FESTIVAL_SIGNUP_CLOSE_TIME_LABEL,
-  type HeritageFestivalSignupSheetDay,
-} from "@/lib/heritage-festival-signups";
+import { type HeritageFestivalSignupSheetDay } from "@/lib/heritage-festival-signups";
 
 export type { HeritageFestivalSignupSheetDay };
 
@@ -43,9 +40,14 @@ export function HeritageFestivalSignupTable({
                 className="px-4 py-4 text-sm font-semibold text-foreground sm:px-5"
               >
                 <div className="space-y-1">
+                  {day.title ? (
+                    <span className="block text-base font-bold text-foreground">
+                      {day.title}
+                    </span>
+                  ) : null}
                   <span className="block">{day.label}</span>
                   <span className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {HERITAGE_FESTIVAL_SIGNUP_CLOSE_TIME_LABEL}
+                    {day.timeLabel}
                   </span>
                 </div>
               </th>
