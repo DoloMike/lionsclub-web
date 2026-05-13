@@ -8,7 +8,10 @@ import {
 
 describe("nav", () => {
   it("mainNav lists primary routes", () => {
-    expect(mainNav.map((i) => i.href)).toContain("/fundraising");
+    const hrefs = mainNav.map((i) => i.href);
+
+    expect(hrefs).toContain("/fundraising");
+    expect(hrefs).toContain("/heritage-festival-2026-signup");
   });
 
   describe("isNavHrefActive", () => {
