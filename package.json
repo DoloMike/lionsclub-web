@@ -25,6 +25,9 @@
     "bun": ">=1.0"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.3",
     "next": "16.2.4",
@@ -32,6 +35,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "server-only": "^0.0.1",
+    "sharp": "^0.34.5",
     "stripe": "^22.0.2"
   },
   "devDependencies": {
@@ -48,7 +52,6 @@
     "eslint-config-next": "16.2.4",
     "husky": "^9.1.7",
     "jsdom": "^29.0.2",
-    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "to-ico": "^1.1.5",
     "typescript": "^5",

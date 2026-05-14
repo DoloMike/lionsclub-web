@@ -3,12 +3,15 @@ import { Container } from "@/components/Container";
 import { FundraisingTrustCallout } from "@/components/fundraising/FundraisingTrustCallout";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
+import { SitePhotoBanner } from "@/components/site-photos/SitePhotoBanner";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Link from "next/link";
 import { formatInstantInTimezone } from "@/lib/datetime";
 import type { FundraiserEventRow } from "@/lib/data/fundraiser";
 import { getFundraiserEventsForMarketingPage } from "@/lib/data/fundraiser";
+import { getPublishedSitePhotosBySection } from "@/lib/data/site-photos";
+import { isSupabaseConfigured } from "@/lib/env";
 import { FUNDRAISER_INSTANT_DISPLAY_TIMEZONE } from "@/lib/fundraiser-dates";
 import { googleMapsSearchUrl } from "@/lib/maps-links";
 
@@ -71,8 +74,13 @@ function PickupLocationAnchor({ label }: { label: string }) {
 }
 
 export default async function FundraisingPage() {
-  const { acceptingOrders, closedBeforePickup } =
-    await getFundraiserEventsForMarketingPage();
+  const [{ acceptingOrders, closedBeforePickup }, bannerPhotos] =
+    await Promise.all([
+      getFundraiserEventsForMarketingPage(),
+      isSupabaseConfigured()
+        ? getPublishedSitePhotosBySection("fundraising-banner").catch(() => [])
+        : Promise.resolve([]),
+    ]);
 
   return (
     <>
@@ -80,6 +88,12 @@ export default async function FundraisingPage() {
         title="Fundraising"
         description="Our chicken cooks are community traditions, held a few times a year. When ordering is open, you’ll see a banner on the site and can pay online."
       />
+      {bannerPhotos.length > 0 ? (
+        <SitePhotoBanner
+          photos={bannerPhotos}
+          ariaLabel="Fundraising photo highlights"
+        />
+      ) : null}
       <div className="border-b border-border bg-section-warm">
         <Container className="py-8 sm:py-10">
           <FundraisingTrustCallout variant="marketing" />

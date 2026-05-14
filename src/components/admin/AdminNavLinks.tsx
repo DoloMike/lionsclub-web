@@ -10,6 +10,8 @@ const links = [
   { href: "/admin/officers", label: "Officers" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/fundraiser", label: "Fundraisers" },
+  { href: "/admin/volunteer", label: "Volunteer sign-ups" },
+  { href: "/admin/photos", label: "Photos" },
 ] as const;
 
 function adminNavClass(active: boolean): string {

@@ -1,4 +1,11 @@
 import { addChapterEvent, deleteChapterEvent } from "../actions";
+import { AdminAddCard } from "@/components/admin/AdminAddCard";
+import {
+  adminDestructiveLinkClass,
+  adminInputClass,
+  adminLabelClass,
+  adminPrimaryButtonClass,
+} from "@/components/admin/admin-form-styles";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
@@ -7,6 +14,8 @@ export default async function AdminChapterEventsPage() {
     .from("chapter_events")
     .select("id, title, event_date, description")
     .order("event_date", { ascending: true });
+
+  const rows = events ?? [];
 
   return (
     <div>
@@ -18,7 +27,7 @@ export default async function AdminChapterEventsPage() {
         chapter meetings you want visitors to see.
       </p>
 
-      {(events ?? []).length === 0 ? (
+      {rows.length === 0 ? (
         <div className="mt-8">
           <EmptyState
             title="No events yet"
@@ -26,17 +35,15 @@ export default async function AdminChapterEventsPage() {
           />
         </div>
       ) : (
-        <ul className="mt-8 divide-y divide-border rounded-lg border border-border">
-          {(events ?? []).map((ev) => (
+        <ul className="mt-8 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+          {rows.map((ev) => (
             <li
               key={ev.id}
-              className="flex flex-wrap items-start justify-between gap-4 px-4 py-4"
+              className="flex flex-wrap items-start justify-between gap-4 px-5 py-4"
             >
               <div>
                 <p className="font-medium text-foreground">{ev.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {ev.event_date}
-                </p>
+                <p className="text-sm text-muted-foreground">{ev.event_date}</p>
                 {ev.description ? (
                   <p className="mt-1 text-sm text-muted-foreground">
                     {ev.description}
@@ -45,10 +52,7 @@ export default async function AdminChapterEventsPage() {
               </div>
               <form action={deleteChapterEvent}>
                 <input type="hidden" name="id" value={ev.id} />
-                <button
-                  type="submit"
-                  className="text-sm font-medium text-destructive hover:underline"
-                >
+                <button type="submit" className={adminDestructiveLinkClass}>
                   Delete
                 </button>
               </form>
@@ -57,49 +61,47 @@ export default async function AdminChapterEventsPage() {
         </ul>
       )}
 
-      <form action={addChapterEvent} className="mt-10 max-w-md space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Add Event</h2>
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium">
-            Title
-          </label>
-          <input
-            id="title"
-            name="title"
-            required
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="event_date" className="block text-sm font-medium">
-            Date
-          </label>
-          <input
-            id="event_date"
-            name="event_date"
-            type="date"
-            required
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium">
-            Description (optional)
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={3}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
-        >
-          Add event
-        </button>
-      </form>
+      <AdminAddCard title="Add event" defaultOpen={rows.length === 0}>
+        <form action={addChapterEvent} className="max-w-md space-y-4">
+          <div>
+            <label htmlFor="title" className={adminLabelClass}>
+              Title
+            </label>
+            <input
+              id="title"
+              name="title"
+              required
+              className={adminInputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="event_date" className={adminLabelClass}>
+              Date
+            </label>
+            <input
+              id="event_date"
+              name="event_date"
+              type="date"
+              required
+              className={adminInputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="description" className={adminLabelClass}>
+              Description (optional)
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              className={adminInputClass}
+            />
+          </div>
+          <button type="submit" className={adminPrimaryButtonClass}>
+            Add event
+          </button>
+        </form>
+      </AdminAddCard>
     </div>
   );
 }

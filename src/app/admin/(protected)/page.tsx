@@ -26,6 +26,16 @@ const cards = [
     title: "Fundraisers",
     body: "Chicken cooks—dates, pricing, pickup, ordering window, per-event stats and CSV export.",
   },
+  {
+    href: "/admin/volunteer",
+    title: "Volunteer sign-ups",
+    body: "Create signup sheets for any event—shifts, names, and per-event public pages at /volunteer/<slug>.",
+  },
+  {
+    href: "/admin/photos",
+    title: "Photos",
+    body: "Upload banner photos shown on the public site (Fundraising page banner, more sections coming).",
+  },
 ] as const;
 
 export default function AdminDashboardPage() {

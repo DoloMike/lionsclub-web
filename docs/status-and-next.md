@@ -1,6 +1,6 @@
 # Status & next steps
 
-**Last updated:** April 2026  
+**Last updated:** May 2026  
 
 Single place for **what’s done** in this repo and **what’s next**. Deeper product history and IA live in [lewisport-lions-site-plan.md](lewisport-lions-site-plan.md); the long UX audit lives in [ux-review.md](ux-review.md) (baseline, not a live checklist).
 
@@ -10,9 +10,12 @@ Single place for **what’s done** in this repo and **what’s next**. Deeper pr
 
 - **Public site:** Core routes — home, about, service, events, fundraising, chicken order + Stripe return, membership, contact, privacy, terms, login; skip link, header/footer, mobile nav, active nav states, theme toggle.
 - **Content & trust:** Chapter copy, fundraiser trust callouts, expanded privacy/terms, footer trust block, warm section styling, home hero + community card, campaign banner polish, empty/success patterns where implemented.
-- **Supabase:** Migrations for `site_settings`, officers, chapter events, social links, `profiles` (roles: `guest` / `member` / `admin`), `fundraiser_events`, `chicken_orders`. Local CLI defaults to API **55421** (see `supabase/config.toml`).
+- **Supabase:** Migrations for `site_settings`, officers, chapter events, social links, `profiles` (roles: `guest` / `member` / `admin`), `fundraiser_events`, `chicken_orders`, `heritage_festival_signups`, `volunteer_events` / `volunteer_shifts` / `volunteer_signups`, `site_photos` + `site-photos` Storage bucket. Local CLI defaults to API **55421** (see `supabase/config.toml`).
 - **Auth:** Google sign-in for admins (`/admin/login`, `/auth/callback`); session refresh via `proxy.ts` (Next 16 file-convention proxy, formerly `middleware.ts`). Account menu: guests see “Become a Member”; members/admins don’t.
-- **Admin:** Dashboard, meeting schedule, social links, officers, events, fundraisers (CRUD + ordering toggle). Per-fundraiser **stats** (`/admin/fundraiser/[eventId]/stats`) and **CSV export** (`GET /api/admin/fundraiser/[eventId]/orders-csv`).
+- **Admin:** Dashboard, meeting schedule, social links, officers, events, fundraisers (CRUD + ordering toggle). Per-fundraiser **stats** (`/admin/fundraiser/[eventId]/stats`, opens in a new tab) and **CSV export** (`GET /api/admin/fundraiser/[eventId]/orders-csv`). Closed/past fundraiser cards collapse their edit form by default; "deadline passed while ordering open" cards highlight in red and stay expanded.
+- **Admin UI consistency:** Every admin page now uses the same patterns — `<AdminAddCard>` for collapsible "Add ___" panels, shared class-name constants in `src/components/admin/admin-form-styles.ts` for primary buttons / labels / inputs / destructive links, and `bg-card` containers so list items don't blend into the page background.
+- **Volunteer sign-ups:** Generic admin-managed signup sheets at `/admin/volunteer` and public pages at `/volunteer/<slug>` (plus a `/volunteer` index of published events). Each event has multiple shifts (date + optional label + free-text time + optional cap); admins publish + toggle signups-open independently. **Sign-ups require a Google sign-in** — names are pulled from `user_metadata` (no free-text input), one signup per user per shift via a partial unique index, and users can remove their own signup. Published events also surface on `/events` under a "Volunteer Sign-Ups" section. The hardcoded Heritage Festival 2026 page is unchanged — it remains its own dedicated route.
+- **Site photos:** Admin-managed banner photos at `/admin/photos` organized by section key (`SITE_PHOTO_SECTIONS` in `src/lib/photo-sections.ts`). Currently wired to the **Fundraising page** banner. Uploads accept JPEG/PNG/WEBP/AVIF (≤10 MB), are auto-rotated via EXIF, resized to ≤1920×1920, EXIF-stripped, and re-encoded as WebP server-side via `sharp`. Multi-file upload and drag-to-reorder (via `@dnd-kit`) supported. Public bucket `site-photos` serves the optimized files directly.
 - **Chicken fundraising:** Guest Stripe Checkout (`STRIPE_SECRET_KEY`); order row written after paid return; deadlines enforced in app; inventory checks at checkout when capped. Buyer receipts via Stripe (per-session `payment_intent_data.receipt_email` + Dashboard **Successful payments** toggle).
 - **Production deploy:** Live at **[https://lewisportlions.club](https://lewisportlions.club)**. Real customers have signed in and ordered chickens end-to-end.
 

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getChapterEvents } from "@/lib/data/chapter-content";
+import { getPublishedVolunteerEvents } from "@/lib/data/volunteer-signups";
+import { isSupabaseConfigured } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: "Events",
@@ -13,7 +16,14 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-  const events = await getChapterEvents();
+  const [events, volunteerEvents] = await Promise.all([
+    getChapterEvents(),
+    isSupabaseConfigured()
+      ? getPublishedVolunteerEvents().catch(() => [])
+      : Promise.resolve([]),
+  ]);
+  const hasAnyAnnouncement =
+    events.length > 0 || volunteerEvents.length > 0;
 
   return (
     <>
@@ -22,7 +32,7 @@ export default async function EventsPage() {
         description="Parades, screenings, fundraisers, and chapter meetings—published by chapter admins."
       />
       <Prose>
-        {events.length === 0 ? (
+        {!hasAnyAnnouncement ? (
           <div className="not-prose">
             <EmptyState
               title="No upcoming events published yet"
@@ -37,7 +47,8 @@ export default async function EventsPage() {
               }
             />
           </div>
-        ) : (
+        ) : null}
+        {events.length > 0 ? (
           <ul>
             {events.map((ev) => (
               <li key={ev.id}>
@@ -51,7 +62,22 @@ export default async function EventsPage() {
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
+        {volunteerEvents.length > 0 ? (
+          <>
+            <h2>Volunteer Sign-Ups</h2>
+            <p className="text-muted-foreground">
+              Sign in with Google to add yourself to a shift.
+            </p>
+            <ul>
+              {volunteerEvents.map((ev) => (
+                <li key={ev.id}>
+                  <Link href={`/volunteer/${ev.slug}`}>{ev.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
         <h2>Recurring Touchpoints</h2>
         <ul>
           <li>Christmas parade morning pancake breakfast</li>

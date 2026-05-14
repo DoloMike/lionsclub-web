@@ -1,5 +1,10 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { site } from "@/lib/site";
+import {
+  adminInputClass,
+  adminLabelClass,
+  adminPrimaryButtonClass,
+} from "@/components/admin/admin-form-styles";
 import { updateMeetingSchedule } from "../actions";
 
 export default async function AdminSettingsPage() {
@@ -23,12 +28,12 @@ export default async function AdminSettingsPage() {
         <span className="font-mono text-xs">{site.address.displayLine}</span>
         ).
       </p>
-      <form action={updateMeetingSchedule} className="mt-8 max-w-xl space-y-4">
+      <form
+        action={updateMeetingSchedule}
+        className="mt-8 max-w-xl space-y-4 rounded-lg border border-border bg-card p-5"
+      >
         <div>
-          <label
-            htmlFor="meeting_schedule"
-            className="block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="meeting_schedule" className={adminLabelClass}>
             Schedule
           </label>
           <textarea
@@ -37,13 +42,10 @@ export default async function AdminSettingsPage() {
             required
             rows={6}
             defaultValue={value}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+            className={adminInputClass}
           />
         </div>
-        <button
-          type="submit"
-          className="inline-flex items-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors duration-150 hover:bg-primary/90 active:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        >
+        <button type="submit" className={adminPrimaryButtonClass}>
           Save
         </button>
       </form>

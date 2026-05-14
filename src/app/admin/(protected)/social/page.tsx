@@ -3,6 +3,14 @@ import {
   deleteSocialLink,
   updateSocialLink,
 } from "../actions";
+import { AdminAddCard } from "@/components/admin/AdminAddCard";
+import {
+  adminDestructiveLinkClass,
+  adminInputClass,
+  adminLabelClass,
+  adminPrimaryButtonClass,
+  adminPrimaryButtonCompactClass,
+} from "@/components/admin/admin-form-styles";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 const ICON_OPTIONS = [
@@ -21,6 +29,8 @@ export default async function AdminSocialPage() {
     .select("id, label, url, icon_key, sort_order")
     .order("sort_order", { ascending: true });
 
+  const rows = links ?? [];
+
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -30,37 +40,36 @@ export default async function AdminSocialPage() {
         Shown in the site footer under Contact. Use full URLs (https://…).
       </p>
 
-      <ul className="mt-8 divide-y divide-border rounded-lg border border-border">
-        {(links ?? []).length === 0 ? (
-          <li className="px-4 py-6 text-sm text-muted-foreground">
-            No links yet — add one below (or run the latest DB migration to
-            seed defaults).
-          </li>
-        ) : (
-          (links ?? []).map((row) => (
-            <li key={row.id} className="px-4 py-4">
+      {rows.length === 0 ? (
+        <p className="mt-8 rounded-lg border border-border bg-card px-4 py-6 text-sm text-muted-foreground">
+          No links yet — add one below (or run the latest DB migration to seed
+          defaults).
+        </p>
+      ) : (
+        <ul className="mt-8 space-y-4">
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className="rounded-lg border border-border bg-card p-5 shadow-sm"
+            >
               <form action={updateSocialLink} className="space-y-3">
                 <input type="hidden" name="id" value={row.id} />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Label
-                    </label>
+                    <label className={adminLabelClass}>Label</label>
                     <input
                       name="label"
                       required
                       defaultValue={row.label}
-                      className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                      className={adminInputClass}
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Icon
-                    </label>
+                    <label className={adminLabelClass}>Icon</label>
                     <select
                       name="icon_key"
                       defaultValue={row.icon_key}
-                      className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                      className={adminInputClass}
                     >
                       {ICON_OPTIONS.map((o) => (
                         <option key={o.value} value={o.value}>
@@ -71,91 +80,87 @@ export default async function AdminSocialPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">
-                    URL
-                  </label>
+                  <label className={adminLabelClass}>URL</label>
                   <input
                     name="url"
                     type="url"
                     required
                     defaultValue={row.url}
-                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                    className={adminInputClass}
                   />
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div>
                   <button
                     type="submit"
-                    className="rounded-full bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground"
+                    className={adminPrimaryButtonCompactClass}
                   >
                     Save
                   </button>
                 </div>
               </form>
-              <form action={deleteSocialLink} className="mt-2">
+              <form
+                action={deleteSocialLink}
+                className="mt-4 border-t border-border pt-3"
+              >
                 <input type="hidden" name="id" value={row.id} />
-                <button
-                  type="submit"
-                  className="text-sm font-medium text-destructive hover:underline"
-                >
+                <button type="submit" className={adminDestructiveLinkClass}>
                   Remove
                 </button>
               </form>
             </li>
-          ))
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
 
-      <form action={addSocialLink} className="mt-10 max-w-xl space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Add Link</h2>
-        <div>
-          <label htmlFor="new-label" className="block text-sm font-medium">
-            Label
-          </label>
-          <input
-            id="new-label"
-            name="label"
-            required
-            placeholder="e.g. Chapter Facebook"
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="new-icon" className="block text-sm font-medium">
-            Icon
-          </label>
-          <select
-            id="new-icon"
-            name="icon_key"
-            defaultValue="link"
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          >
-            {ICON_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="new-url" className="block text-sm font-medium">
-            URL
-          </label>
-          <input
-            id="new-url"
-            name="url"
-            type="url"
-            required
-            placeholder="https://"
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground"
-        >
-          Add link
-        </button>
-      </form>
+      <AdminAddCard title="Add social link" defaultOpen={rows.length === 0}>
+        <form action={addSocialLink} className="max-w-xl space-y-4">
+          <div>
+            <label htmlFor="new-label" className={adminLabelClass}>
+              Label
+            </label>
+            <input
+              id="new-label"
+              name="label"
+              required
+              placeholder="e.g. Chapter Facebook"
+              className={adminInputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="new-icon" className={adminLabelClass}>
+              Icon
+            </label>
+            <select
+              id="new-icon"
+              name="icon_key"
+              defaultValue="link"
+              className={adminInputClass}
+            >
+              {ICON_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="new-url" className={adminLabelClass}>
+              URL
+            </label>
+            <input
+              id="new-url"
+              name="url"
+              type="url"
+              required
+              placeholder="https://"
+              className={adminInputClass}
+            />
+          </div>
+          <button type="submit" className={adminPrimaryButtonClass}>
+            Add link
+          </button>
+        </form>
+      </AdminAddCard>
     </div>
   );
 }
