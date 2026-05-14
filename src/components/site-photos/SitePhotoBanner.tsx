@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { SitePhotoPublicImage } from "@/components/site-photos/SitePhotoPublicImage";
 import type { SitePhoto } from "@/lib/site-photos";
 
 const ROTATE_MS = 5500;
@@ -75,9 +76,9 @@ export function SitePhotoBanner({
               transitionDuration: `${TRANSITION_MS}ms`,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={photo.publicUrl}
+            <SitePhotoPublicImage
+              key={`${photo.id}-${photo.publicUrl}`}
+              publicUrl={photo.publicUrl}
               alt={photo.altText}
               loading={idx === 0 ? "eager" : "lazy"}
               decoding={idx === 0 ? "sync" : "async"}

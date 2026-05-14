@@ -24,6 +24,7 @@ import {
   adminLabelClass,
   adminPrimaryButtonClass,
 } from "@/components/admin/admin-form-styles";
+import { SitePhotoPublicImage } from "@/components/site-photos/SitePhotoPublicImage";
 import type { SitePhoto } from "@/lib/site-photos";
 
 type ActionFn = (formData: FormData) => void | Promise<void>;
@@ -151,9 +152,9 @@ function SortablePhotoCard({
       }`}
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photo.publicUrl}
+        <SitePhotoPublicImage
+          key={`${photo.id}-${photo.publicUrl}`}
+          publicUrl={photo.publicUrl}
           alt={photo.altText}
           loading="lazy"
           className="h-full w-full object-cover"

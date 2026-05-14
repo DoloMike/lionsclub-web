@@ -45,6 +45,25 @@ describe("site-photos lib", () => {
     });
   });
 
+  describe("withImageCacheBust", () => {
+    it("appends __cb without clobbering path", async () => {
+      const { withImageCacheBust } = await import("@/lib/site-photos");
+      const base =
+        "https://example.supabase.co/storage/v1/object/public/site-photos/fundraising-banner/x.webp";
+      const out = withImageCacheBust(base, "173");
+      expect(out).toBe(`${base}?__cb=173`);
+    });
+
+    it("merges with existing query string", async () => {
+      const { withImageCacheBust } = await import("@/lib/site-photos");
+      const base =
+        "https://example.supabase.co/storage/v1/object/public/site-photos/a/b.webp?foo=1";
+      const out = withImageCacheBust(base, "x");
+      expect(out).toContain("__cb=x");
+      expect(out).toContain("foo=1");
+    });
+  });
+
   describe("extensionForMimeType", () => {
     it("maps the four supported types", async () => {
       const { extensionForMimeType } = await import("@/lib/site-photos");

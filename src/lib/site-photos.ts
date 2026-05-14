@@ -43,6 +43,18 @@ function encodeStoragePath(path: string): string {
     .join("/");
 }
 
+/**
+ * Adds a query param so the browser uses a new cache key. Use in `img`
+ * `onError` when a public storage URL may have a stale bad response in the
+ * HTTP cache (e.g. transient 400 right after upload). Supabase ignores
+ * unknown params for these GETs.
+ */
+export function withImageCacheBust(url: string, token: string): string {
+  const u = new URL(url);
+  u.searchParams.set("__cb", token);
+  return u.toString();
+}
+
 const EXT_BY_MIME: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
