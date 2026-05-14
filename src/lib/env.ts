@@ -23,6 +23,12 @@ export const env = {
   },
   /** Same Web client ID as Google OAuth / One Tap (public) */
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
+  heritageFestival: {
+    notificationWebhookUrl:
+      process.env.HERITAGE_FESTIVAL_SIGNUP_NOTIFY_WEBHOOK_URL ?? "",
+    notificationWebhookSecret:
+      process.env.HERITAGE_FESTIVAL_SIGNUP_NOTIFY_WEBHOOK_SECRET ?? "",
+  },
   /** IANA timezone for fundraiser order deadlines vs "today" (Hancock County, KY) */
   siteTimezone:
     process.env.NEXT_PUBLIC_SITE_TIMEZONE ?? "America/Kentucky/Louisville",
@@ -46,4 +52,8 @@ export function isStripeWebhookConfigured(): boolean {
 
 export function isGoogleOneTapConfigured(): boolean {
   return Boolean(env.googleClientId);
+}
+
+export function isHeritageFestivalNotificationConfigured(): boolean {
+  return Boolean(env.heritageFestival.notificationWebhookUrl);
 }

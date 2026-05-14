@@ -7,6 +7,8 @@ describe("env helpers", () => {
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-role");
     vi.stubEnv("STRIPE_SECRET_KEY", "");
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "");
+    vi.stubEnv("HERITAGE_FESTIVAL_SIGNUP_NOTIFY_WEBHOOK_URL", "");
+    vi.stubEnv("HERITAGE_FESTIVAL_SIGNUP_NOTIFY_WEBHOOK_SECRET", "");
     vi.resetModules();
   });
 
@@ -36,5 +38,15 @@ describe("env helpers", () => {
     vi.resetModules();
     const { isGoogleOneTapConfigured } = await import("@/lib/env");
     expect(isGoogleOneTapConfigured()).toBe(true);
+  });
+
+  it("isHeritageFestivalNotificationConfigured reflects webhook url", async () => {
+    vi.stubEnv(
+      "HERITAGE_FESTIVAL_SIGNUP_NOTIFY_WEBHOOK_URL",
+      "https://example.com/webhooks/heritage-signups",
+    );
+    vi.resetModules();
+    const { isHeritageFestivalNotificationConfigured } = await import("@/lib/env");
+    expect(isHeritageFestivalNotificationConfigured()).toBe(true);
   });
 });

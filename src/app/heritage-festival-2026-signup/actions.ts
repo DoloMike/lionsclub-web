@@ -6,6 +6,7 @@ import {
   getHeritageFestivalSignupLabel,
   isHeritageFestivalSignupDate,
 } from "@/lib/heritage-festival-signups";
+import { sendHeritageFestivalSignupNotification } from "@/lib/heritage-festival-signup-notifications";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export async function addHeritageFestivalSignup(formData: FormData) {
@@ -28,6 +29,15 @@ export async function addHeritageFestivalSignup(formData: FormData) {
   if (error) {
     throw new Error(
       `Could not save your sign up for ${getHeritageFestivalSignupLabel(signupDate)}.`,
+    );
+  }
+
+  try {
+    await sendHeritageFestivalSignupNotification({ signupDate, name });
+  } catch (notificationError) {
+    console.error(
+      "Heritage Festival signup notification failed",
+      notificationError,
     );
   }
 
