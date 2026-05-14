@@ -720,80 +720,114 @@ async function maxSortOrderForSection(section: string): Promise<number> {
   return data?.sort_order ?? 0;
 }
 
-export async function addSitePhotos(formData: FormData) {
-  await assertAdmin();
-  const section = readSitePhotoSection(formData);
-  const { alt_text, caption, published } =
-    readSitePhotoMetadataFields(formData);
-
-  const rawFiles = formData.getAll("file");
-  const files = rawFiles.filter(
-    (f): f is File => f instanceof File && f.size > 0,
-  );
-  if (files.length === 0) {
-    throw new Error("Please choose at least one image to upload");
+function sitePhotoActionMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object" && err !== null) {
+    const o = err as Record<string, unknown>;
+    if (typeof o.message === "string" && o.message.length > 0) return o.message;
+    if (typeof o.error_description === "string")
+      return o.error_description;
   }
-  for (const file of files) {
-    if (
-      !SITE_PHOTO_ALLOWED_MIME_TYPES.includes(
-        file.type as (typeof SITE_PHOTO_ALLOWED_MIME_TYPES)[number],
-      )
-    ) {
-      throw new Error(
-        `"${file.name}" is not a supported image type — use JPEG, PNG, WEBP, or AVIF.`,
-      );
-    }
-    if (file.size > SITE_PHOTO_MAX_BYTES) {
-      throw new Error(`"${file.name}" is too large (max 10 MB).`);
-    }
-  }
+  return "Upload failed. Please try again or use a different JPEG, PNG, WebP, or AVIF file.";
+}
 
-  const admin = getSupabaseAdmin();
-  const baseSortOrder = await maxSortOrderForSection(section);
-  const uploadedPaths: string[] = [];
+export type AddSitePhotosState = { error: string | null };
 
+async function runAddSitePhotos(formData: FormData): Promise<
+  { ok: true; section: string } | { ok: false; message: string }
+> {
   try {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]!;
-      const optimized = await optimizeUploadedImage(file);
-      const storagePath = `${section}/${crypto.randomUUID()}.${optimized.extension}`;
+    await assertAdmin();
+    const section = readSitePhotoSection(formData);
+    const { alt_text, caption, published } =
+      readSitePhotoMetadataFields(formData);
 
-      const { error: uploadErr } = await admin.storage
-        .from(SITE_PHOTO_BUCKET)
-        .upload(storagePath, optimized.buffer, {
-          contentType: optimized.contentType,
-          upsert: false,
-        });
-      if (uploadErr) {
-        throw new Error(
-          `Could not upload "${file.name}": ${uploadErr.message}`,
-        );
+    const rawFiles = formData.getAll("file");
+    const files = rawFiles.filter(
+      (f): f is File => f instanceof File && f.size > 0,
+    );
+    if (files.length === 0) {
+      return {
+        ok: false,
+        message: "Please choose at least one image to upload",
+      };
+    }
+    for (const file of files) {
+      if (
+        !SITE_PHOTO_ALLOWED_MIME_TYPES.includes(
+          file.type as (typeof SITE_PHOTO_ALLOWED_MIME_TYPES)[number],
+        )
+      ) {
+        return {
+          ok: false,
+          message: `"${file.name}" is not a supported image type — use JPEG, PNG, WEBP, or AVIF.`,
+        };
       }
-      uploadedPaths.push(storagePath);
-
-      const { error: insertErr } = await admin.from("site_photos").insert({
-        section,
-        storage_path: storagePath,
-        alt_text,
-        caption,
-        sort_order: baseSortOrder + i + 1,
-        published,
-      });
-      if (insertErr) throw insertErr;
+      if (file.size > SITE_PHOTO_MAX_BYTES) {
+        return {
+          ok: false,
+          message: `"${file.name}" is too large (max 10 MB).`,
+        };
+      }
     }
+
+    const admin = getSupabaseAdmin();
+    const baseSortOrder = await maxSortOrderForSection(section);
+    const uploadedPaths: string[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]!;
+        const optimized = await optimizeUploadedImage(file);
+        const storagePath = `${section}/${crypto.randomUUID()}.${optimized.extension}`;
+
+        const { error: uploadErr } = await admin.storage
+          .from(SITE_PHOTO_BUCKET)
+          .upload(storagePath, optimized.buffer, {
+            contentType: optimized.contentType,
+            upsert: false,
+          });
+        if (uploadErr) {
+          throw new Error(
+            `Could not upload "${file.name}": ${uploadErr.message}`,
+          );
+        }
+        uploadedPaths.push(storagePath);
+
+        const { error: insertErr } = await admin.from("site_photos").insert({
+          section,
+          storage_path: storagePath,
+          alt_text,
+          caption,
+          sort_order: baseSortOrder + i + 1,
+          published,
+        });
+        if (insertErr) throw insertErr;
+      }
+    } catch (err) {
+      if (uploadedPaths.length > 0) {
+        await admin.storage
+          .from(SITE_PHOTO_BUCKET)
+          .remove(uploadedPaths)
+          .catch(() => undefined);
+      }
+      return { ok: false, message: sitePhotoActionMessage(err) };
+    }
+
+    return { ok: true, section };
   } catch (err) {
-    // Roll back any storage objects we wrote so the bucket doesn't accumulate
-    // orphan blobs whose metadata rows never made it in.
-    if (uploadedPaths.length > 0) {
-      await admin.storage
-        .from(SITE_PHOTO_BUCKET)
-        .remove(uploadedPaths)
-        .catch(() => undefined);
-    }
-    throw err;
+    console.error("[addSitePhotos]", err);
+    return { ok: false, message: sitePhotoActionMessage(err) };
   }
+}
 
-  updateTag(`site-photos:${section}`);
+export async function addSitePhotos(
+  _prevState: AddSitePhotosState,
+  formData: FormData,
+): Promise<AddSitePhotosState> {
+  const result = await runAddSitePhotos(formData);
+  if (!result.ok) return { error: result.message };
+  updateTag(`site-photos:${result.section}`);
   redirect("/admin/photos?saved=1");
 }
 

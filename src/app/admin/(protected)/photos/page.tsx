@@ -1,15 +1,10 @@
 import Link from "next/link";
 import {
-  addSitePhotos,
   deleteSitePhoto,
   reorderSitePhotos,
   updateSitePhoto,
 } from "../actions";
-import {
-  adminInputClass,
-  adminLabelClass,
-  adminPrimaryButtonClass,
-} from "@/components/admin/admin-form-styles";
+import { SitePhotoUploadForm } from "@/components/site-photos/SitePhotoUploadForm";
 import { SortablePhotoGrid } from "@/components/site-photos/SortablePhotoGrid";
 import { getAllSitePhotosBySection } from "@/lib/data/site-photos";
 import {
@@ -72,66 +67,7 @@ async function SectionCard({ section }: { section: SitePhotoSection }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M7 5l6 5-6 5" />
           </svg>
         </summary>
-        <form
-          action={addSitePhotos}
-          className="space-y-4 border-t border-border px-4 py-4"
-        >
-          <input type="hidden" name="section" value={section.key} />
-          <div>
-            <label className={adminLabelClass}>Image files</label>
-            <input
-              name="file"
-              type="file"
-              required
-              multiple
-              accept="image/jpeg,image/png,image/webp,image/avif"
-              className="mt-1 block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              JPEG, PNG, WEBP, or AVIF · max 10 MB each. Pick one file or
-              several at once. We resize and re-encode to WebP on upload so the
-              banner stays fast.
-            </p>
-          </div>
-          <div>
-            <label className={adminLabelClass}>
-              Alt text (applied to every photo in this batch)
-            </label>
-            <input
-              name="alt_text"
-              required
-              maxLength={200}
-              placeholder="Describe the photos for screen readers"
-              className={adminInputClass}
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Refine each photo&apos;s alt text individually after upload.
-            </p>
-          </div>
-          <div>
-            <label className={adminLabelClass}>
-              Caption (optional, applied to every photo in this batch)
-            </label>
-            <input
-              name="caption"
-              maxLength={280}
-              placeholder="Shown overlaid on the photo"
-              className={adminInputClass}
-            />
-          </div>
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              name="published"
-              defaultChecked
-              className="rounded border-border"
-            />
-            Show on the public site
-          </label>
-          <button type="submit" className={adminPrimaryButtonClass}>
-            Upload photos
-          </button>
-        </form>
+        <SitePhotoUploadForm sectionKey={section.key} />
       </details>
 
       <div className="mt-5 border-t border-border pt-5">
