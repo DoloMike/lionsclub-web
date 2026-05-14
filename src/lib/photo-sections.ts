@@ -20,6 +20,20 @@ export const SITE_PHOTO_SECTIONS = [
       "Scrolling photo banner at the top of the /events page. Landscape photos (roughly 16:7) crop best.",
     location: "/events",
   },
+  {
+    key: "about-banner",
+    label: "About banner",
+    description:
+      "Scrolling photo banner at the top of the /about page. Landscape photos (roughly 16:7) crop best.",
+    location: "/about",
+  },
+  {
+    key: "service-banner",
+    label: "Service banner",
+    description:
+      "Scrolling photo banner at the top of the /service page. Landscape photos (roughly 16:7) crop best.",
+    location: "/service",
+  },
 ] as const;
 
 export type SitePhotoSection = (typeof SITE_PHOTO_SECTIONS)[number];

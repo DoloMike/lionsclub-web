@@ -100,15 +100,19 @@ describe("site-photos lib", () => {
 });
 
 describe("photo-sections registry", () => {
-  it("includes banner sections for fundraising and events", async () => {
+  it("includes banner sections for marketing pages", async () => {
     const { SITE_PHOTO_SECTIONS, isSitePhotoSectionKey } = await import(
       "@/lib/photo-sections"
     );
     const keys = SITE_PHOTO_SECTIONS.map((s) => s.key);
     expect(keys).toContain("fundraising-banner");
     expect(keys).toContain("events-banner");
+    expect(keys).toContain("about-banner");
+    expect(keys).toContain("service-banner");
     expect(isSitePhotoSectionKey("fundraising-banner")).toBe(true);
     expect(isSitePhotoSectionKey("events-banner")).toBe(true);
+    expect(isSitePhotoSectionKey("about-banner")).toBe(true);
+    expect(isSitePhotoSectionKey("service-banner")).toBe(true);
   });
 
   it("rejects unknown section keys", async () => {

@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { ExternalLink } from "@/components/ExternalLink";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
+import { SitePhotoBanner } from "@/components/site-photos/SitePhotoBanner";
 import { getOfficers } from "@/lib/data/chapter-content";
+import { getPublishedSitePhotosBySection } from "@/lib/data/site-photos";
+import { isSupabaseConfigured } from "@/lib/env";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -12,7 +15,12 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const officers = await getOfficers();
+  const [officers, bannerPhotos] = await Promise.all([
+    getOfficers(),
+    isSupabaseConfigured()
+      ? getPublishedSitePhotosBySection("about-banner").catch(() => [])
+      : Promise.resolve([]),
+  ]);
 
   return (
     <>
@@ -20,6 +28,12 @@ export default async function AboutPage() {
         title="About Our Chapter"
         description={`${site.name} is a volunteer service organization in ${site.location}. We’re chartered under ${site.district} and part of the global Lions network.`}
       />
+      {bannerPhotos.length > 0 ? (
+        <SitePhotoBanner
+          photos={bannerPhotos}
+          ariaLabel="About photo highlights"
+        />
+      ) : null}
       <Prose>
         <p>
           We focus on what Lewisport and Hancock County need most: vision and

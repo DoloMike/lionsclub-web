@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { ExternalLink } from "@/components/ExternalLink";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
+import { SitePhotoBanner } from "@/components/site-photos/SitePhotoBanner";
+import { getPublishedSitePhotosBySection } from "@/lib/data/site-photos";
+import { isSupabaseConfigured } from "@/lib/env";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -11,13 +14,23 @@ export const metadata: Metadata = {
   alternates: { canonical: "/service" },
 };
 
-export default function ServicePage() {
+export default async function ServicePage() {
+  const bannerPhotos = isSupabaseConfigured()
+    ? await getPublishedSitePhotosBySection("service-banner").catch(() => [])
+    : [];
+
   return (
     <>
       <PageHeader
         title="What We Do"
         description="Programs align with our chapter’s public project list—local first, with ties to Kentucky Lions Eye Foundation and broader Lions initiatives."
       />
+      {bannerPhotos.length > 0 ? (
+        <SitePhotoBanner
+          photos={bannerPhotos}
+          ariaLabel="Service photo highlights"
+        />
+      ) : null}
       <Prose>
         <h2>Vision &amp; Hearing</h2>
         <p>
