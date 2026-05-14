@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { Prose } from "@/components/Prose";
+import { SitePhotoBanner } from "@/components/site-photos/SitePhotoBanner";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { getChapterEvents } from "@/lib/data/chapter-content";
+import { getPublishedSitePhotosBySection } from "@/lib/data/site-photos";
 import { getPublishedVolunteerEvents } from "@/lib/data/volunteer-signups";
 import { isSupabaseConfigured } from "@/lib/env";
 
@@ -16,10 +18,13 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-  const [events, volunteerEvents] = await Promise.all([
+  const [events, volunteerEvents, bannerPhotos] = await Promise.all([
     getChapterEvents(),
     isSupabaseConfigured()
       ? getPublishedVolunteerEvents().catch(() => [])
+      : Promise.resolve([]),
+    isSupabaseConfigured()
+      ? getPublishedSitePhotosBySection("events-banner").catch(() => [])
       : Promise.resolve([]),
   ]);
   const hasAnyAnnouncement =
@@ -31,6 +36,12 @@ export default async function EventsPage() {
         title="Events & calendar"
         description="Parades, screenings, fundraisers, and chapter meetings—published by chapter admins."
       />
+      {bannerPhotos.length > 0 ? (
+        <SitePhotoBanner
+          photos={bannerPhotos}
+          ariaLabel="Events photo highlights"
+        />
+      ) : null}
       <Prose>
         {!hasAnyAnnouncement ? (
           <div className="not-prose">

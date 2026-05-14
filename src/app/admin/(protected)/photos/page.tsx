@@ -48,14 +48,11 @@ async function SectionCard({ section }: { section: SitePhotoSection }) {
         </span>
       </div>
 
-      <details
-        open={photos.length === 0}
-        className="group mt-5 rounded-lg border border-dashed border-border bg-muted/10"
-      >
+      <details className="group mt-5 rounded-lg border border-dashed border-border bg-muted/10">
         <summary
           className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background [&::-webkit-details-marker]:hidden"
         >
-          <span>Upload photos</span>
+          <span>Upload &amp; manage photos</span>
           <svg
             className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-open:rotate-90"
             viewBox="0 0 20 20"
@@ -68,20 +65,19 @@ async function SectionCard({ section }: { section: SitePhotoSection }) {
           </svg>
         </summary>
         <SitePhotoUploadForm sectionKey={section.key} />
+        <div className="border-t border-border px-4 pb-5 pt-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Photos in this section
+          </p>
+          <SortablePhotoGrid
+            photos={photos}
+            section={section.key}
+            reorderAction={reorderSitePhotos}
+            updateAction={updateSitePhoto}
+            deleteAction={deleteSitePhoto}
+          />
+        </div>
       </details>
-
-      <div className="mt-5 border-t border-border pt-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Photos in this section
-        </p>
-        <SortablePhotoGrid
-          photos={photos}
-          section={section.key}
-          reorderAction={reorderSitePhotos}
-          updateAction={updateSitePhoto}
-          deleteAction={deleteSitePhoto}
-        />
-      </div>
     </li>
   );
 }
@@ -93,9 +89,9 @@ export default async function AdminPhotosPage() {
         Photos
       </h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Upload photos shown on the public site. Each section corresponds to a
-        specific spot (e.g. the banner at the top of the Fundraising page). New
-        sections show up here automatically as we add them in code.
+        Upload photos shown on the public site. Each section below can be
+        expanded to upload or manage images for that spot. New sections appear
+        here automatically when we add them in code.
       </p>
 
       <ul className="mt-8 space-y-8">

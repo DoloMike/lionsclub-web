@@ -16,6 +16,13 @@ export const SITE_PHOTO_ALLOWED_MIME_TYPES = [
 /** Maximum upload size — mirrors the bucket's `file_size_limit` (10 MiB). */
 export const SITE_PHOTO_MAX_BYTES = 10 * 1024 * 1024;
 
+/**
+ * Soft cap for all files in one multipart submit. Must stay below
+ * `experimental.serverActions.bodySizeLimit` and `experimental.proxyClientMaxBodySize`
+ * in `next.config.ts` (multipart adds overhead).
+ */
+export const SITE_PHOTO_BATCH_BODY_SOFT_LIMIT_BYTES = 60 * 1024 * 1024;
+
 export type SitePhoto = {
   id: string;
   section: string;

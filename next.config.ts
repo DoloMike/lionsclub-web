@@ -32,16 +32,23 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   /**
-   * Default Server Action body limit is 1 MB. Photo uploads allow 10 MB per
-   * file (see SITE_PHOTO_MAX_BYTES); multipart overhead needs headroom.
+   * Default Server Action body limit is 1 MB. Site photo uploads allow 10 MiB
+   * per file and `multiple` on one form — the limit must cover the whole
+   * multipart body (e.g. several files + boundaries), or busboy ends with
+   * "Unexpected end of form".
    *
-   * In Next 16.2.x this must live under `experimental.serverActions` — a
-   * top-level `serverActions` key is ignored, so the limit would stay 1 MB.
+   * With `src/proxy.ts` enabled, Next also enforces **proxyClientMaxBodySize**
+   * (default **10 MB**) on incoming request bodies. That cuts off multi-file
+   * uploads before `serverActions.bodySizeLimit` is applied — raise both.
+   *
+   * In Next 16.2.x `serverActions` must live under `experimental`.
    */
   experimental: {
     serverActions: {
-      bodySizeLimit: "12mb",
+      // ~6× max per-file size (see SITE_PHOTO_MAX_BYTES) + multipart overhead
+      bodySizeLimit: "64mb",
     },
+    proxyClientMaxBodySize: "64mb",
   },
   async headers() {
     return [
