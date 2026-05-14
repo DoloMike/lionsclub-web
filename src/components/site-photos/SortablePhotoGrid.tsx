@@ -92,6 +92,7 @@ export function SortablePhotoGrid({
         {isPending ? " · Saving…" : ""}
       </p>
       <DndContext
+        id={`site-photos-reorder-${section}`}
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
