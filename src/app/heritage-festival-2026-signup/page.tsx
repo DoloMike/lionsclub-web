@@ -46,7 +46,7 @@ export default async function HeritageFestivalSignupPage() {
           </p>
         ) : null}
       </Prose>
-      <div className="mx-auto mt-10 max-w-5xl px-4 pb-16 sm:px-6 lg:px-8">
+      <div className="mx-auto mt-6 max-w-5xl px-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] sm:mt-10 sm:px-6 lg:px-8">
         <HeritageFestivalSignupTable
           days={days}
           addSignup={addHeritageFestivalSignup}
