@@ -140,6 +140,37 @@ export function Landing() {
         </Container>
       </section>
 
+      <section
+        className="border-y border-border/60 bg-primary/[0.06] py-14"
+        aria-labelledby="hancock-county-fair-signup-callout"
+      >
+        <Container>
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <Eyebrow tone="primary">Volunteer spotlight</Eyebrow>
+              <h2
+                id="hancock-county-fair-signup-callout"
+                className="mt-3 text-2xl font-bold tracking-tight text-foreground"
+              >
+                Hancock County Fair 2026 sign up
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                Fair Gate and Lions Booth volunteer spots are open now for Thursday,
+                Friday, and Saturday evening coverage.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
+              <ButtonLink href="/hancock-county-fair-2026-signup" size="lg">
+                Sign up for Hancock County Fair 2026
+              </ButtonLink>
+              <ButtonLink href="/contact" variant="secondary" size="lg">
+                Ask a question
+              </ButtonLink>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       <section className="py-14" aria-labelledby="mission">
         <Container>
           <h2
