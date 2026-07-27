@@ -36,6 +36,11 @@ const cards = [
     title: "Photos",
     body: "Upload banner photos shown on the public site (Fundraising page banner, more sections coming).",
   },
+  {
+    href: "/admin/admins",
+    title: "Admins",
+    body: "See who has site-admin access and invite another trusted administrator.",
+  },
 ] as const;
 
 export default function AdminDashboardPage() {
